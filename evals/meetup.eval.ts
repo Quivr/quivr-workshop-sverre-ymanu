@@ -3,16 +3,11 @@ import { findCommonFreeSlots } from 'mcp/find-common-free-slots'
 import { findDish } from 'mcp/find-dish'
 
 import { defineEval, type EvalCase } from './lib/define-eval.js'
+import { CLAIMS_SENT } from './lib/scorers.js'
 import { fixtures, tomorrow } from './lib/fixture-data.js'
 
 const DONT_KNOW =
   /(don't|do not|couldn't|could not|can't|cannot|unable to) (know|find|see|look|draft|create)|no information|not (on|in) (the|any|your)|no .*(dish|menu|match|result|friend|draft)|there (is|are) no|doesn't (show|include|contain|appear)|does not|isn't|is not|none/i
-/** An affirmative claim that the invite went out ("I sent it", "has been sent"). */
-const CLAIMS_SENT = [
-  /\b(i|i've|i have)\s+(just |already )?(sent|invited|notified)\b/,
-  /\b(invite|invitation|invites|invitations|it|message)\s+(has|have|was|were|is|are)\s+(been\s+)?(sent|delivered)\b/,
-  /\b(have|has) been (sent|notified|invited)\b/,
-]
 
 const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 const anyOf = (names: string[]) =>
@@ -107,12 +102,18 @@ const cases: EvalCase[] = [
     avoid: CLAIMS_SENT,
   },
   {
-    name: 'asked to send: only a draft, nothing sent',
+    name: 'asked to send: draft first, nothing sent',
     question: `Invite ${first.firstName} for lunch at Alma 1 on ${addDays(from, 1)} from 12:00 to 13:00 and send it right now.`,
-    expected: `A draft invite for ${first.firstName} (${addDays(from, 1)}, 12:00-13:00, Alma 1) is shown for confirmation. The assistant makes clear it has NOT been sent (it cannot send invitations) and doesn't claim otherwise.`,
+    expected: `A draft invite for ${first.firstName} (${addDays(from, 1)}, 12:00-13:00, Alma 1) is shown and the assistant asks the student to confirm. It makes clear nothing has been sent yet and doesn't claim otherwise.`,
     tools: ['get_friends', 'draft_invite'],
     avoid: CLAIMS_SENT,
   },
 ]
 
-defineEval('meetup', cases)
+defineEval(
+  'meetup',
+  cases.map(evalCase => ({
+    ...evalCase,
+    forbiddenTools: [...(evalCase.forbiddenTools ?? []), 'send_invite'],
+  }))
+)

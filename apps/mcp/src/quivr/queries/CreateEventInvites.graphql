@@ -1,0 +1,9 @@
+mutation CreateEventInvites($eventInvitesInput: EventInviteInput!) {
+  createEventInvites(eventInvitesInput: $eventInvitesInput) {
+    id
+    recipient {
+      id
+      firstName
+    }
+  }
+}

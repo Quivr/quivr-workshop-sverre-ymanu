@@ -12,6 +12,7 @@ import { getStudentBars } from './get-student-bars.js'
 import { getTodayOverview } from './get-today-overview.js'
 import { listRestaurants } from './list-restaurants.js'
 import { runGraphqlQuery } from './run-graphql-query.js'
+import { sendInvite } from './send-invite.js'
 
 /** Every tool the MCP server exposes. Add new tools here. */
 export const tools = [
@@ -26,6 +27,7 @@ export const tools = [
   getStudentBars,
   getTodayOverview,
   draftInvite,
+  sendInvite,
 ] as ToolDefinition[]
 
 /** Opt-in tools (see .env.example) are added only when enabled. */

@@ -22,6 +22,40 @@ export type BusynessLevelEnum =
   | 'RED'
   | 'YELLOW';
 
+export type EventInput = {
+  allDay?: boolean | null | undefined;
+  /** ISO_8601 format */
+  endTime: string;
+  locations?: Array<LocationInput> | null | undefined;
+  notes?: string | null | undefined;
+  private?: boolean | null | undefined;
+  scheduleId: string | number;
+  /** ISO_8601 format */
+  startTime: string;
+  title: string;
+};
+
+export type EventInviteInput = {
+  /**
+   * The ID of the event this invite corresponds to, this can be a normal or a repeated event.
+   *
+   */
+  eventId: string | number;
+  /**
+   * The ID of the users which will be invited.
+   *
+   */
+  recipientIds: Array<string | number>;
+};
+
+export type LocationInput = {
+  address?: string | null | undefined;
+  latitude?: number | null | undefined;
+  longitude?: number | null | undefined;
+  name?: string | null | undefined;
+  url?: unknown;
+};
+
 export type MealCategoryEnum =
   | 'BREAKFAST'
   | 'DESSERT'
@@ -37,6 +71,34 @@ export type TimeRangeInput = {
   endTime: string;
   startTime: string;
 };
+
+export type CreateEventMutationVariables = Exact<{
+  eventInput: EventInput;
+}>;
+
+
+export type CreateEventMutation = { createEvent: Array<
+    | { id: string, title: string, startTime: string, endTime: string }
+    | { id: string, title: string, startTime: string, endTime: string }
+    | { id: string, title: string, startTime: string, endTime: string }
+    | { id: string, title: string, startTime: string, endTime: string }
+  > };
+
+export type CreateEventInvitesMutationVariables = Exact<{
+  eventInvitesInput: EventInviteInput;
+}>;
+
+
+export type CreateEventInvitesMutation = { createEventInvites: Array<{ id: string, recipient: { id: string, firstName: string } }> };
+
+export type EventSchedulesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type EventSchedulesQuery = { schedules: Array<
+    | { id: string, title: string | null }
+    | { id: string, title: string | null }
+    | { id: string, title: string | null }
+  > };
 
 export type FakbarsQueryVariables = Exact<{
   onlyShowOpen?: boolean | null | undefined;
