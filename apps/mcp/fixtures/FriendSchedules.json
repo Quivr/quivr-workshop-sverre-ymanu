@@ -1,0 +1,776 @@
+{
+  "{\"friendIds\":[\"9001\"],\"timeRange\":{\"endTime\":\"2026-11-14T23:59:59+01:00\",\"startTime\":\"2026-11-14T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9001",
+        "scheduleItems": []
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9002\"],\"timeRange\":{\"endTime\":\"2026-11-14T23:59:59+01:00\",\"startTime\":\"2026-11-14T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9002",
+        "scheduleItems": []
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9003\"],\"timeRange\":{\"endTime\":\"2026-11-14T23:59:59+01:00\",\"startTime\":\"2026-11-14T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9003",
+        "scheduleItems": []
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9001\"],\"timeRange\":{\"endTime\":\"2026-11-15T23:59:59+01:00\",\"startTime\":\"2026-11-15T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9001",
+        "scheduleItems": []
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9002\"],\"timeRange\":{\"endTime\":\"2026-11-15T23:59:59+01:00\",\"startTime\":\"2026-11-15T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9002",
+        "scheduleItems": []
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9003\"],\"timeRange\":{\"endTime\":\"2026-11-15T23:59:59+01:00\",\"startTime\":\"2026-11-15T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9003",
+        "scheduleItems": []
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9001\"],\"timeRange\":{\"endTime\":\"2026-11-16T23:59:59+01:00\",\"startTime\":\"2026-11-16T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9001",
+        "scheduleItems": [
+          {
+            "id": "9001202611160",
+            "startTime": "2026-11-16T09:00:00+01:00",
+            "endTime": "2026-11-16T12:00:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9001202611161",
+            "startTime": "2026-11-16T13:30:00+01:00",
+            "endTime": "2026-11-16T15:30:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9002\"],\"timeRange\":{\"endTime\":\"2026-11-16T23:59:59+01:00\",\"startTime\":\"2026-11-16T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9002",
+        "scheduleItems": [
+          {
+            "id": "9002202611160",
+            "startTime": "2026-11-16T10:00:00+01:00",
+            "endTime": "2026-11-16T12:00:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9002202611161",
+            "startTime": "2026-11-16T16:00:00+01:00",
+            "endTime": "2026-11-16T18:00:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9003\"],\"timeRange\":{\"endTime\":\"2026-11-16T23:59:59+01:00\",\"startTime\":\"2026-11-16T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9003",
+        "scheduleItems": [
+          {
+            "id": "9003202611160",
+            "startTime": "2026-11-16T08:30:00+01:00",
+            "endTime": "2026-11-16T10:30:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9003202611161",
+            "startTime": "2026-11-16T14:00:00+01:00",
+            "endTime": "2026-11-16T16:00:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9001\"],\"timeRange\":{\"endTime\":\"2026-11-17T23:59:59+01:00\",\"startTime\":\"2026-11-17T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9001",
+        "scheduleItems": [
+          {
+            "id": "9001202611170",
+            "startTime": "2026-11-17T09:00:00+01:00",
+            "endTime": "2026-11-17T12:00:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9001202611171",
+            "startTime": "2026-11-17T13:30:00+01:00",
+            "endTime": "2026-11-17T15:30:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9002\"],\"timeRange\":{\"endTime\":\"2026-11-17T23:59:59+01:00\",\"startTime\":\"2026-11-17T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9002",
+        "scheduleItems": [
+          {
+            "id": "9002202611170",
+            "startTime": "2026-11-17T10:00:00+01:00",
+            "endTime": "2026-11-17T12:00:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9002202611171",
+            "startTime": "2026-11-17T16:00:00+01:00",
+            "endTime": "2026-11-17T18:00:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9003\"],\"timeRange\":{\"endTime\":\"2026-11-17T23:59:59+01:00\",\"startTime\":\"2026-11-17T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9003",
+        "scheduleItems": [
+          {
+            "id": "9003202611170",
+            "startTime": "2026-11-17T08:30:00+01:00",
+            "endTime": "2026-11-17T10:30:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9003202611171",
+            "startTime": "2026-11-17T14:00:00+01:00",
+            "endTime": "2026-11-17T16:00:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9001\"],\"timeRange\":{\"endTime\":\"2026-11-18T23:59:59+01:00\",\"startTime\":\"2026-11-18T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9001",
+        "scheduleItems": [
+          {
+            "id": "9001202611180",
+            "startTime": "2026-11-18T09:00:00+01:00",
+            "endTime": "2026-11-18T12:00:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9001202611181",
+            "startTime": "2026-11-18T13:30:00+01:00",
+            "endTime": "2026-11-18T15:30:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9002\"],\"timeRange\":{\"endTime\":\"2026-11-18T23:59:59+01:00\",\"startTime\":\"2026-11-18T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9002",
+        "scheduleItems": [
+          {
+            "id": "9002202611180",
+            "startTime": "2026-11-18T10:00:00+01:00",
+            "endTime": "2026-11-18T12:00:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9002202611181",
+            "startTime": "2026-11-18T16:00:00+01:00",
+            "endTime": "2026-11-18T18:00:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9003\"],\"timeRange\":{\"endTime\":\"2026-11-18T23:59:59+01:00\",\"startTime\":\"2026-11-18T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9003",
+        "scheduleItems": [
+          {
+            "id": "9003202611180",
+            "startTime": "2026-11-18T08:30:00+01:00",
+            "endTime": "2026-11-18T10:30:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9003202611181",
+            "startTime": "2026-11-18T14:00:00+01:00",
+            "endTime": "2026-11-18T16:00:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9001\"],\"timeRange\":{\"endTime\":\"2026-11-19T23:59:59+01:00\",\"startTime\":\"2026-11-19T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9001",
+        "scheduleItems": [
+          {
+            "id": "9001202611190",
+            "startTime": "2026-11-19T09:00:00+01:00",
+            "endTime": "2026-11-19T12:00:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9001202611191",
+            "startTime": "2026-11-19T13:30:00+01:00",
+            "endTime": "2026-11-19T15:30:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9002\"],\"timeRange\":{\"endTime\":\"2026-11-19T23:59:59+01:00\",\"startTime\":\"2026-11-19T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9002",
+        "scheduleItems": [
+          {
+            "id": "9002202611190",
+            "startTime": "2026-11-19T10:00:00+01:00",
+            "endTime": "2026-11-19T12:00:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9002202611191",
+            "startTime": "2026-11-19T16:00:00+01:00",
+            "endTime": "2026-11-19T18:00:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9003\"],\"timeRange\":{\"endTime\":\"2026-11-19T23:59:59+01:00\",\"startTime\":\"2026-11-19T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9003",
+        "scheduleItems": [
+          {
+            "id": "9003202611190",
+            "startTime": "2026-11-19T08:30:00+01:00",
+            "endTime": "2026-11-19T10:30:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9003202611191",
+            "startTime": "2026-11-19T14:00:00+01:00",
+            "endTime": "2026-11-19T16:00:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9001\"],\"timeRange\":{\"endTime\":\"2026-11-20T23:59:59+01:00\",\"startTime\":\"2026-11-20T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9001",
+        "scheduleItems": [
+          {
+            "id": "9001202611200",
+            "startTime": "2026-11-20T09:00:00+01:00",
+            "endTime": "2026-11-20T12:00:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9001202611201",
+            "startTime": "2026-11-20T13:30:00+01:00",
+            "endTime": "2026-11-20T15:30:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9002\"],\"timeRange\":{\"endTime\":\"2026-11-20T23:59:59+01:00\",\"startTime\":\"2026-11-20T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9002",
+        "scheduleItems": [
+          {
+            "id": "9002202611200",
+            "startTime": "2026-11-20T10:00:00+01:00",
+            "endTime": "2026-11-20T12:00:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9002202611201",
+            "startTime": "2026-11-20T16:00:00+01:00",
+            "endTime": "2026-11-20T18:00:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9003\"],\"timeRange\":{\"endTime\":\"2026-11-20T23:59:59+01:00\",\"startTime\":\"2026-11-20T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9003",
+        "scheduleItems": [
+          {
+            "id": "9003202611200",
+            "startTime": "2026-11-20T08:30:00+01:00",
+            "endTime": "2026-11-20T10:30:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9003202611201",
+            "startTime": "2026-11-20T14:00:00+01:00",
+            "endTime": "2026-11-20T16:00:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9001\"],\"timeRange\":{\"endTime\":\"2026-11-21T23:59:59+01:00\",\"startTime\":\"2026-11-21T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9001",
+        "scheduleItems": []
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9002\"],\"timeRange\":{\"endTime\":\"2026-11-21T23:59:59+01:00\",\"startTime\":\"2026-11-21T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9002",
+        "scheduleItems": []
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9003\"],\"timeRange\":{\"endTime\":\"2026-11-21T23:59:59+01:00\",\"startTime\":\"2026-11-21T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9003",
+        "scheduleItems": []
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9001\"],\"timeRange\":{\"endTime\":\"2026-11-22T23:59:59+01:00\",\"startTime\":\"2026-11-22T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9001",
+        "scheduleItems": []
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9002\"],\"timeRange\":{\"endTime\":\"2026-11-22T23:59:59+01:00\",\"startTime\":\"2026-11-22T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9002",
+        "scheduleItems": []
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9003\"],\"timeRange\":{\"endTime\":\"2026-11-22T23:59:59+01:00\",\"startTime\":\"2026-11-22T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9003",
+        "scheduleItems": []
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9001\"],\"timeRange\":{\"endTime\":\"2026-11-23T23:59:59+01:00\",\"startTime\":\"2026-11-23T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9001",
+        "scheduleItems": [
+          {
+            "id": "9001202611230",
+            "startTime": "2026-11-23T09:00:00+01:00",
+            "endTime": "2026-11-23T12:00:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9001202611231",
+            "startTime": "2026-11-23T13:30:00+01:00",
+            "endTime": "2026-11-23T15:30:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9002\"],\"timeRange\":{\"endTime\":\"2026-11-23T23:59:59+01:00\",\"startTime\":\"2026-11-23T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9002",
+        "scheduleItems": [
+          {
+            "id": "9002202611230",
+            "startTime": "2026-11-23T10:00:00+01:00",
+            "endTime": "2026-11-23T12:00:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9002202611231",
+            "startTime": "2026-11-23T16:00:00+01:00",
+            "endTime": "2026-11-23T18:00:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9003\"],\"timeRange\":{\"endTime\":\"2026-11-23T23:59:59+01:00\",\"startTime\":\"2026-11-23T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9003",
+        "scheduleItems": [
+          {
+            "id": "9003202611230",
+            "startTime": "2026-11-23T08:30:00+01:00",
+            "endTime": "2026-11-23T10:30:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9003202611231",
+            "startTime": "2026-11-23T14:00:00+01:00",
+            "endTime": "2026-11-23T16:00:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9001\"],\"timeRange\":{\"endTime\":\"2026-11-24T23:59:59+01:00\",\"startTime\":\"2026-11-24T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9001",
+        "scheduleItems": [
+          {
+            "id": "9001202611240",
+            "startTime": "2026-11-24T09:00:00+01:00",
+            "endTime": "2026-11-24T12:00:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9001202611241",
+            "startTime": "2026-11-24T13:30:00+01:00",
+            "endTime": "2026-11-24T15:30:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9002\"],\"timeRange\":{\"endTime\":\"2026-11-24T23:59:59+01:00\",\"startTime\":\"2026-11-24T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9002",
+        "scheduleItems": [
+          {
+            "id": "9002202611240",
+            "startTime": "2026-11-24T10:00:00+01:00",
+            "endTime": "2026-11-24T12:00:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9002202611241",
+            "startTime": "2026-11-24T16:00:00+01:00",
+            "endTime": "2026-11-24T18:00:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9003\"],\"timeRange\":{\"endTime\":\"2026-11-24T23:59:59+01:00\",\"startTime\":\"2026-11-24T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9003",
+        "scheduleItems": [
+          {
+            "id": "9003202611240",
+            "startTime": "2026-11-24T08:30:00+01:00",
+            "endTime": "2026-11-24T10:30:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9003202611241",
+            "startTime": "2026-11-24T14:00:00+01:00",
+            "endTime": "2026-11-24T16:00:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9001\"],\"timeRange\":{\"endTime\":\"2026-11-25T23:59:59+01:00\",\"startTime\":\"2026-11-25T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9001",
+        "scheduleItems": [
+          {
+            "id": "9001202611250",
+            "startTime": "2026-11-25T09:00:00+01:00",
+            "endTime": "2026-11-25T12:00:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9001202611251",
+            "startTime": "2026-11-25T13:30:00+01:00",
+            "endTime": "2026-11-25T15:30:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9002\"],\"timeRange\":{\"endTime\":\"2026-11-25T23:59:59+01:00\",\"startTime\":\"2026-11-25T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9002",
+        "scheduleItems": [
+          {
+            "id": "9002202611250",
+            "startTime": "2026-11-25T10:00:00+01:00",
+            "endTime": "2026-11-25T12:00:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9002202611251",
+            "startTime": "2026-11-25T16:00:00+01:00",
+            "endTime": "2026-11-25T18:00:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9003\"],\"timeRange\":{\"endTime\":\"2026-11-25T23:59:59+01:00\",\"startTime\":\"2026-11-25T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9003",
+        "scheduleItems": [
+          {
+            "id": "9003202611250",
+            "startTime": "2026-11-25T08:30:00+01:00",
+            "endTime": "2026-11-25T10:30:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9003202611251",
+            "startTime": "2026-11-25T14:00:00+01:00",
+            "endTime": "2026-11-25T16:00:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9001\"],\"timeRange\":{\"endTime\":\"2026-11-26T23:59:59+01:00\",\"startTime\":\"2026-11-26T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9001",
+        "scheduleItems": [
+          {
+            "id": "9001202611260",
+            "startTime": "2026-11-26T09:00:00+01:00",
+            "endTime": "2026-11-26T12:00:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9001202611261",
+            "startTime": "2026-11-26T13:30:00+01:00",
+            "endTime": "2026-11-26T15:30:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9002\"],\"timeRange\":{\"endTime\":\"2026-11-26T23:59:59+01:00\",\"startTime\":\"2026-11-26T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9002",
+        "scheduleItems": [
+          {
+            "id": "9002202611260",
+            "startTime": "2026-11-26T10:00:00+01:00",
+            "endTime": "2026-11-26T12:00:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9002202611261",
+            "startTime": "2026-11-26T16:00:00+01:00",
+            "endTime": "2026-11-26T18:00:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9003\"],\"timeRange\":{\"endTime\":\"2026-11-26T23:59:59+01:00\",\"startTime\":\"2026-11-26T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9003",
+        "scheduleItems": [
+          {
+            "id": "9003202611260",
+            "startTime": "2026-11-26T08:30:00+01:00",
+            "endTime": "2026-11-26T10:30:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9003202611261",
+            "startTime": "2026-11-26T14:00:00+01:00",
+            "endTime": "2026-11-26T16:00:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9001\"],\"timeRange\":{\"endTime\":\"2026-11-27T23:59:59+01:00\",\"startTime\":\"2026-11-27T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9001",
+        "scheduleItems": [
+          {
+            "id": "9001202611270",
+            "startTime": "2026-11-27T09:00:00+01:00",
+            "endTime": "2026-11-27T12:00:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9001202611271",
+            "startTime": "2026-11-27T13:30:00+01:00",
+            "endTime": "2026-11-27T15:30:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9002\"],\"timeRange\":{\"endTime\":\"2026-11-27T23:59:59+01:00\",\"startTime\":\"2026-11-27T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9002",
+        "scheduleItems": [
+          {
+            "id": "9002202611270",
+            "startTime": "2026-11-27T10:00:00+01:00",
+            "endTime": "2026-11-27T12:00:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9002202611271",
+            "startTime": "2026-11-27T16:00:00+01:00",
+            "endTime": "2026-11-27T18:00:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9003\"],\"timeRange\":{\"endTime\":\"2026-11-27T23:59:59+01:00\",\"startTime\":\"2026-11-27T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9003",
+        "scheduleItems": [
+          {
+            "id": "9003202611270",
+            "startTime": "2026-11-27T08:30:00+01:00",
+            "endTime": "2026-11-27T10:30:00+01:00",
+            "allDay": false
+          },
+          {
+            "id": "9003202611271",
+            "startTime": "2026-11-27T14:00:00+01:00",
+            "endTime": "2026-11-27T16:00:00+01:00",
+            "allDay": false
+          }
+        ]
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9001\"],\"timeRange\":{\"endTime\":\"2026-11-28T23:59:59+01:00\",\"startTime\":\"2026-11-28T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9001",
+        "scheduleItems": []
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9002\"],\"timeRange\":{\"endTime\":\"2026-11-28T23:59:59+01:00\",\"startTime\":\"2026-11-28T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9002",
+        "scheduleItems": []
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9003\"],\"timeRange\":{\"endTime\":\"2026-11-28T23:59:59+01:00\",\"startTime\":\"2026-11-28T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9003",
+        "scheduleItems": []
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9001\"],\"timeRange\":{\"endTime\":\"2026-11-29T23:59:59+01:00\",\"startTime\":\"2026-11-29T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9001",
+        "scheduleItems": []
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9002\"],\"timeRange\":{\"endTime\":\"2026-11-29T23:59:59+01:00\",\"startTime\":\"2026-11-29T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9002",
+        "scheduleItems": []
+      }
+    ]
+  },
+  "{\"friendIds\":[\"9003\"],\"timeRange\":{\"endTime\":\"2026-11-29T23:59:59+01:00\",\"startTime\":\"2026-11-29T00:00:00+01:00\"}}": {
+    "friendSchedules": [
+      {
+        "friendId": "9003",
+        "scheduleItems": []
+      }
+    ]
+  }
+}

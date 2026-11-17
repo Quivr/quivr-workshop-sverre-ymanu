@@ -41,6 +41,7 @@
   "exports": {
     "./quivr-client": "./src/quivr/quivr-client.ts",
     "./dates": "./src/quivr/dates.ts",
+    "./find-common-free-slots": "./src/tools/find-common-free-slots.ts",
     "./config": "./src/config.ts"
   }
 }

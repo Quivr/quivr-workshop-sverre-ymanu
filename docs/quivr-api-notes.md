@@ -25,12 +25,14 @@ The Quivr frontend does the same in `scripts/graphql-login.mjs`. Our version is 
 
 ## Operations used by the starter tools
 
-| Tool                    | Operation                                                        | Notes                                                                                                                                      |
-| ----------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `get_my_schedule`       | `scheduleItems(scheduleTypes, timeRange)`                        | Returns `ScheduleItemInterface` (`Lesson`, `Event`, `RepeatedEventInstance`, …). Fetched one day at a time so fixtures line up with dates. |
-| `list_restaurants`      | `restaurants`                                                    | No campus field: use `location { name address }`.                                                                                          |
-| `get_menu`              | `restaurants(ids) { dishes(timeRange) openingHours(timeRange) }` | `Dish`: `name`, `mealCategory`, `prices` (student price first), `vegetarian`, `vegan`, `allergens`.                                        |
-| `get_library_occupancy` | `libraries { data { occupancy capacity timestamp } }`            | `data` can be null for a library without sensors.                                                                                          |
+| Tool                     | Operation                                                        | Notes                                                                                                                                      |
+| ------------------------ | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `get_my_schedule`        | `scheduleItems(scheduleTypes, timeRange)`                        | Returns `ScheduleItemInterface` (`Lesson`, `Event`, `RepeatedEventInstance`, …). Fetched one day at a time so fixtures line up with dates. |
+| `list_restaurants`       | `restaurants`                                                    | No campus field: use `location { name address }`.                                                                                          |
+| `get_menu`               | `restaurants(ids) { dishes(timeRange) openingHours(timeRange) }` | `Dish`: `name`, `mealCategory`, `prices` (student price first), `vegetarian`, `vegan`, `allergens`.                                        |
+| `get_library_occupancy`  | `libraries { data { occupancy capacity timestamp } }`            | `data` can be null for a library without sensors.                                                                                          |
+| `get_friends`            | `friendList { id firstName lastName }`                           | Ids are needed for `find_common_free_slots`.                                                                                               |
+| `find_common_free_slots` | `friendSchedules(friendIds, timeRange)` + `scheduleItems`        | Fetched per friend and day. Only times and `allDay` are requested (no titles/locations). Gaps are computed in `tools/free-slots.ts`.       |
 
 `TimeRangeInput` is `{ startTime: Time!, endTime: Time! }` with ISO 8601 times. We send Brussels day boundaries with the offset, for example `2026-11-13T00:00:00+01:00`.
 

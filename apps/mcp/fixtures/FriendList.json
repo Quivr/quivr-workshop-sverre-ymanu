@@ -1,0 +1,21 @@
+{
+  "{}": {
+    "friendList": [
+      {
+        "id": "9001",
+        "firstName": "Alex",
+        "lastName": "Example"
+      },
+      {
+        "id": "9002",
+        "firstName": "Sam",
+        "lastName": "Sample"
+      },
+      {
+        "id": "9003",
+        "firstName": "Robin",
+        "lastName": "Demo"
+      }
+    ]
+  }
+}
