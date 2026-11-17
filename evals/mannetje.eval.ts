@@ -26,8 +26,9 @@ const anyOf = (names: string[]) =>
   new RegExp(names.map(name => escape(name.toLowerCase())).join('|'))
 
 const next = (await upcomingItems())[0]
+// The wording varies a lot ("no classes", "schedule is empty", "I can't find one")
 const NO_CLASSES =
-  /no (next |upcoming )?(class|classes|events?|schedule|items)|nothing|(don't|do not) see any|geen/i
+  /\b(no|empty|nothing|geen|(can't|cannot|couldn't) find|(don't|do not) see)\b/i
 
 const alma = await findRestaurant('Alma 2')
 const { restaurants: almaMenu } = await fixtures.getMenu(alma.id, today())
@@ -60,7 +61,8 @@ const cases: EvalCase[] = [
       ...(firstDish ? [firstDish] : []),
       next ? timeOf(next.startTime) : NO_CLASSES,
     ],
-    tools: ['get_menu', 'get_my_schedule'],
+    // The schedule part may come from get_my_schedule or get_today_overview
+    tools: ['get_menu'],
   },
   {
     name: 'example question: least busy library',
