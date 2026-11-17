@@ -545,3 +545,47 @@ body {
     animation: dice-fade 250ms ease-out both !important;
   }
 }
+
+/* dungeon-mode: the ability check reuses the dice overlay. Plain success / failure get their own tint. */
+.dice-overlay[data-outcome='pass'] {
+  --dice-tint: color-mix(in srgb, var(--color-ok) 18%, transparent);
+}
+
+.dice-overlay[data-outcome='miss'] {
+  --dice-tint: color-mix(in srgb, var(--color-danger) 14%, transparent);
+}
+
+.dice-stage[data-outcome='pass'] {
+  --dice-accent: var(--color-ok);
+  --dice-edge: var(--color-ok);
+}
+
+.dice-stage[data-outcome='miss'] {
+  --dice-accent: var(--color-danger);
+  --dice-edge: var(--color-danger);
+}
+
+.dice-slot {
+  position: relative;
+  width: 170px;
+  height: 170px;
+}
+
+/* Two dice (advantage / disadvantage): the same die, scaled down to fit side by side */
+.dice-slot[data-size='small'] {
+  width: 112px;
+  height: 112px;
+}
+
+.dice-slot[data-size='small'] > .dice-die {
+  transform: scale(0.66);
+  transform-origin: 0 0;
+}
+
+.dice-column {
+  transition: opacity 300ms;
+}
+
+.dice-column[data-dim='true'] {
+  opacity: 0.4;
+}

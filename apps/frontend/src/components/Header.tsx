@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 
+import { DEFAULT_DC } from '../dice/check'
 import type { Theme } from '../useTheme'
 
 type Props = {
   models: string[]
   model: string
   theme: Theme
+  isDungeonMode: boolean
   isShowingTraces: boolean
   canCopyChat: boolean
   onCopyChat: () => Promise<boolean>
@@ -13,6 +15,7 @@ type Props = {
   onNewChat: () => void
   onToggleTraces: () => void
   onToggleTheme: () => void
+  onToggleDungeonMode: () => void
 }
 
 const buttonClass = 'rounded px-2 py-1 text-sm hover:bg-sidenav-secondary'
@@ -21,6 +24,7 @@ export function Header({
   models,
   model,
   theme,
+  isDungeonMode,
   isShowingTraces,
   canCopyChat,
   onCopyChat,
@@ -28,6 +32,7 @@ export function Header({
   onNewChat,
   onToggleTraces,
   onToggleTheme,
+  onToggleDungeonMode,
 }: Props) {
   const [copyState, setCopyState] = useState<'copied' | 'failed' | null>(null)
 
@@ -93,6 +98,24 @@ export function Header({
         className={buttonClass}
       >
         New chat
+      </button>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={isDungeonMode}
+        onClick={onToggleDungeonMode}
+        title={`Roll to send: pass a d20 check against DC ${DEFAULT_DC} before each prompt goes out`}
+        className={`${buttonClass} flex items-center gap-2`}
+      >
+        Dungeon mode
+        <span
+          aria-hidden="true"
+          className={`inline-block h-4 w-7 rounded-full p-0.5 transition-colors ${isDungeonMode ? 'bg-main' : 'bg-sidenav-secondary'}`}
+        >
+          <span
+            className={`block h-3 w-3 rounded-full transition-transform ${isDungeonMode ? 'bg-sidenav-blue translate-x-3' : 'bg-cardbg translate-x-0'}`}
+          />
+        </span>
       </button>
       <button
         type="button"
