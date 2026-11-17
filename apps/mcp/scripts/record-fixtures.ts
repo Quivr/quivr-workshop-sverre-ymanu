@@ -36,6 +36,8 @@ const dates = datesBetween(
 
 const { restaurants } = await quivr.listRestaurants()
 await quivr.getLibraries()
+await quivr.getReceivedEventInvites(false)
+await quivr.getReceivedEventInvites(true)
 for (const date of dates) {
   await quivr.getMySchedule(date)
   await Promise.all(restaurants.map(r => quivr.getMenu(r.id, date)))

@@ -1,4 +1,5 @@
 import type { ToolDefinition } from './define-tool.js'
+import { getEventInvites } from './get-event-invites.js'
 import { getLibraryOccupancy } from './get-library-occupancy.js'
 import { getMenu } from './get-menu.js'
 import { getMySchedule } from './get-my-schedule.js'
@@ -10,4 +11,5 @@ export const tools = [
   listRestaurants,
   getMenu,
   getLibraryOccupancy,
+  getEventInvites,
 ] as ToolDefinition[]

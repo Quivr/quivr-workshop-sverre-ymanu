@@ -26,7 +26,9 @@ export const anonymise = (value: unknown, parentKey = ''): unknown => {
   const record = value as Record<string, unknown>
   const isTeacher = parentKey === 'teachers'
   const isPersonalEvent =
-    typeof record.__typename === 'string' && record.__typename !== 'Lesson'
+    (typeof record.__typename === 'string' && record.__typename !== 'Lesson') ||
+    // events inside invites: made up by friends, so personal
+    parentKey === 'event'
 
   return Object.fromEntries(
     Object.entries(record).map(([key, field]) => {
@@ -34,6 +36,19 @@ export const anonymise = (value: unknown, parentKey = ''): unknown => {
         return [key, fakePerson(key)]
       }
       if (DROPPED_KEYS.has(key)) return [key, null]
+      if (
+        parentKey === 'event' &&
+        key === 'locations' &&
+        Array.isArray(field)
+      ) {
+        return [
+          key,
+          field.map(() => ({
+            name: faker.location.street(),
+            address: faker.location.streetAddress(),
+          })),
+        ]
+      }
       if (isTeacher && key === 'name') return [key, faker.person.fullName()]
       if (isPersonalEvent && key === 'title') {
         return [key, faker.helpers.arrayElement(PRIVATE_EVENT_TITLES)]

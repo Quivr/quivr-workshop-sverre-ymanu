@@ -1,0 +1,95 @@
+{
+  "{\"showAccepted\":false}": {
+    "receivedEventInvites": [
+      {
+        "accepted": false,
+        "event": {
+          "allDay": false,
+          "endTime": "2026-11-20T23:59:00+01:00",
+          "locations": [
+            {
+              "address": "1 Example Street, Ghent",
+              "name": "Example Bar"
+            }
+          ],
+          "startTime": "2026-11-20T20:00:00+01:00",
+          "title": "Game night"
+        },
+        "id": "9001",
+        "sender": {
+          "firstName": "Sam"
+        }
+      },
+      {
+        "accepted": false,
+        "event": {
+          "allDay": false,
+          "endTime": "2026-11-22T17:00:00+01:00",
+          "locations": [],
+          "startTime": "2026-11-22T14:00:00+01:00",
+          "title": "Study session"
+        },
+        "id": "9002",
+        "sender": {
+          "firstName": "Alex"
+        }
+      }
+    ]
+  },
+  "{\"showAccepted\":true}": {
+    "receivedEventInvites": [
+      {
+        "accepted": false,
+        "event": {
+          "allDay": false,
+          "endTime": "2026-11-20T23:59:00+01:00",
+          "locations": [
+            {
+              "address": "1 Example Street, Ghent",
+              "name": "Example Bar"
+            }
+          ],
+          "startTime": "2026-11-20T20:00:00+01:00",
+          "title": "Game night"
+        },
+        "id": "9001",
+        "sender": {
+          "firstName": "Sam"
+        }
+      },
+      {
+        "accepted": false,
+        "event": {
+          "allDay": false,
+          "endTime": "2026-11-22T17:00:00+01:00",
+          "locations": [],
+          "startTime": "2026-11-22T14:00:00+01:00",
+          "title": "Study session"
+        },
+        "id": "9002",
+        "sender": {
+          "firstName": "Alex"
+        }
+      },
+      {
+        "accepted": true,
+        "event": {
+          "allDay": false,
+          "endTime": "2026-11-18T22:00:00+01:00",
+          "locations": [
+            {
+              "address": null,
+              "name": "Example Park"
+            }
+          ],
+          "startTime": "2026-11-18T18:00:00+01:00",
+          "title": "Barbecue"
+        },
+        "id": "9003",
+        "sender": {
+          "firstName": "Sam"
+        }
+      }
+    ]
+  }
+}

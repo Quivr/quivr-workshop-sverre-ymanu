@@ -1,0 +1,19 @@
+query ReceivedEventInvites($showAccepted: Boolean!) {
+  receivedEventInvites(showAccepted: $showAccepted) {
+    id
+    accepted
+    sender {
+      firstName
+    }
+    event {
+      title
+      startTime
+      endTime
+      allDay
+      locations {
+        name
+        address
+      }
+    }
+  }
+}

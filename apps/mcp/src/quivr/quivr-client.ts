@@ -13,6 +13,7 @@ import type {
   LibrariesQuery,
   MenuQuery,
   MyScheduleQuery,
+  ReceivedEventInvitesQuery,
   RestaurantsQuery,
 } from './__generated__/graphql.js'
 import { dayRange } from './dates.js'
@@ -54,6 +55,12 @@ export class QuivrClient {
 
   getLibraries(): Promise<LibrariesQuery> {
     return this.request('Libraries', {})
+  }
+
+  getReceivedEventInvites(
+    showAccepted: boolean
+  ): Promise<ReceivedEventInvitesQuery> {
+    return this.request('ReceivedEventInvites', { showAccepted })
   }
 
   async request<T>(operationName: string, variables: object): Promise<T> {

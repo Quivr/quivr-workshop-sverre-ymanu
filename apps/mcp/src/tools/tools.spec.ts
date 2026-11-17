@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import type { QuivrClient } from '../quivr/quivr-client.js'
+import { getEventInvites } from './get-event-invites.js'
 import { getLibraryOccupancy } from './get-library-occupancy.js'
 import { getMenu } from './get-menu.js'
 import { getMySchedule } from './get-my-schedule.js'
@@ -155,5 +156,71 @@ describe('get_library_occupancy', () => {
       expect.objectContaining({ name: 'Agora', percentFull: 25 }),
       expect.objectContaining({ name: 'No sensor', percentFull: undefined }),
     ])
+  })
+})
+
+describe('get_event_invites', () => {
+  const invites = [
+    {
+      id: '2',
+      accepted: true,
+      sender: { firstName: 'Alex' },
+      event: {
+        title: 'Barbecue',
+        startTime: '2026-11-20T18:00:00+01:00',
+        endTime: '2026-11-20T22:00:00+01:00',
+        allDay: false,
+        locations: [],
+      },
+    },
+    {
+      id: '1',
+      accepted: false,
+      sender: { firstName: 'Sam' },
+      event: {
+        title: 'Game night',
+        startTime: '2026-11-18T20:00:00+01:00',
+        endTime: '2026-11-18T23:00:00+01:00',
+        allDay: false,
+        locations: [{ name: 'Example Bar', address: null }],
+      },
+    },
+  ]
+
+  it('asks for pending invites by default and maps compact fields sorted by start', async () => {
+    const calls: boolean[] = []
+    const quivr = fakeQuivr({
+      getReceivedEventInvites: async (showAccepted: boolean) => {
+        calls.push(showAccepted)
+        return { receivedEventInvites: invites } as never
+      },
+    })
+
+    const result = await getEventInvites.run({ onlyPending: true }, quivr)
+
+    expect(calls).toEqual([false])
+    expect(result).toEqual([
+      expect.objectContaining({
+        id: '1',
+        event: 'Game night',
+        invitedBy: 'Sam',
+        location: 'Example Bar',
+        accepted: false,
+      }),
+      expect.objectContaining({ id: '2', invitedBy: 'Alex', accepted: true }),
+    ])
+  })
+
+  it('includes accepted invites when onlyPending is false', async () => {
+    const calls: boolean[] = []
+    const quivr = fakeQuivr({
+      getReceivedEventInvites: async (showAccepted: boolean) => {
+        calls.push(showAccepted)
+        return { receivedEventInvites: [] } as never
+      },
+    })
+
+    expect(await getEventInvites.run({ onlyPending: false }, quivr)).toEqual([])
+    expect(calls).toEqual([true])
   })
 })

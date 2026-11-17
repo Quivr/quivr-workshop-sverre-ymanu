@@ -57,6 +57,13 @@ export type MyScheduleQuery = { scheduleItems: { scheduleItems: Array<
       | { __typename: 'RepeatedEventInstance', id: string, title: string, startTime: string, endTime: string, locations: Array<{ name: string | null, address: string | null }> | null }
     > } };
 
+export type ReceivedEventInvitesQueryVariables = Exact<{
+  showAccepted: boolean;
+}>;
+
+
+export type ReceivedEventInvitesQuery = { receivedEventInvites: Array<{ id: string, accepted: boolean, sender: { firstName: string }, event: { title: string, startTime: string, endTime: string, allDay: boolean, locations: Array<{ name: string | null, address: string | null }> | null } }> };
+
 export type RestaurantsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
