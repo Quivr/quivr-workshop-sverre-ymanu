@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import type { QuivrClient } from '../quivr/quivr-client.js'
+import { findDish } from './find-dish.js'
 import { getLibraryOccupancy } from './get-library-occupancy.js'
 import { getMenu } from './get-menu.js'
 import { getMySchedule } from './get-my-schedule.js'
@@ -155,5 +156,98 @@ describe('get_library_occupancy', () => {
       expect.objectContaining({ name: 'Agora', percentFull: 25 }),
       expect.objectContaining({ name: 'No sensor', percentFull: undefined }),
     ])
+  })
+})
+
+describe('find_dish', () => {
+  const dish = (name: string, vegetarian = false, vegan = false) => ({
+    name,
+    mealCategory: 'WARM_BUFFET',
+    prices: [4.6, 6.1],
+    vegetarian,
+    vegan,
+    allergens: [],
+  })
+  const menus: Record<string, Record<string, object[]>> = {
+    '1': {
+      '2026-11-17': [dish('Lasagna bolognese.'), dish('Soup')],
+      '2026-11-19': [dish('Vegetable LASAGNA', true), dish('Crème brûlée')],
+    },
+    '2': { '2026-11-18': [dish('Vegan lasagna', false, true)] },
+  }
+  const quivr = fakeQuivr({
+    listRestaurants: async () =>
+      ({
+        restaurants: [
+          { id: '1', name: 'Alma 1' },
+          { id: '2', name: 'Alma 2' },
+        ],
+      }) as never,
+    getMenu: async (restaurantId: string, date: string) =>
+      ({
+        restaurants: [
+          {
+            id: restaurantId,
+            name: `Alma ${restaurantId}`,
+            openingHours: [],
+            dishes: menus[restaurantId]?.[date] ?? [],
+          },
+        ],
+      }) as never,
+  })
+
+  it('finds matching dishes across restaurants and days, sorted by date', async () => {
+    const result = await findDish.run(
+      { query: 'lasagna', from: '2026-11-17', days: 3 },
+      quivr
+    )
+
+    expect(result).toMatchObject({
+      from: '2026-11-17',
+      to: '2026-11-19',
+      totalMatches: 3,
+      matches: [
+        {
+          date: '2026-11-17',
+          restaurant: 'Alma 1',
+          dish: 'Lasagna bolognese',
+          vegetarian: false,
+          price: 4.6,
+        },
+        {
+          date: '2026-11-18',
+          restaurant: 'Alma 2',
+          dish: 'Vegan lasagna',
+          vegetarian: true,
+          vegan: true,
+        },
+        { date: '2026-11-19', dish: 'Vegetable LASAGNA', vegetarian: true },
+      ],
+    })
+  })
+
+  it('ignores case and accents and only looks inside the requested days', async () => {
+    const accent = await findDish.run(
+      { query: 'CREME brulee', from: '2026-11-17', days: 3 },
+      quivr
+    )
+    expect(accent).toMatchObject({
+      matches: [{ dish: 'Crème brûlée' }],
+    })
+
+    const outside = await findDish.run(
+      { query: 'lasagna', from: '2026-11-17', days: 1 },
+      quivr
+    )
+    expect(outside).toMatchObject({ totalMatches: 1 })
+  })
+
+  it('returns an empty list when nothing matches', async () => {
+    const result = await findDish.run(
+      { query: 'pizza', from: '2026-11-17', days: 7 },
+      quivr
+    )
+
+    expect(result).toMatchObject({ totalMatches: 0, matches: [] })
   })
 })
