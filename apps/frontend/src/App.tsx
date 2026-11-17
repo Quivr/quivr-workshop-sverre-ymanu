@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 
 import { isNearBottom } from './chatHelpers'
 import { loadChat, saveChat, toMarkdown } from './chatStorage'
+import { DEFAULT_DC } from './dice/check'
+import { gateSend } from './dice/gate'
+import { CheckOverlay } from './components/CheckOverlay'
 import { Composer } from './components/Composer'
 import { DiceRoller } from './components/DiceRoller'
 import { Header } from './components/Header'
@@ -10,6 +13,9 @@ import { QuivrMannetje } from './components/QuivrMannetje'
 import { TracesPanel } from './components/TracesPanel'
 import { Welcome } from './components/Welcome'
 import { useAgentChat } from './useAgentChat'
+import { useDiceStats } from './useDiceStats'
+import { useDungeonCheck } from './useDungeonCheck'
+import { useDungeonMode } from './useDungeonMode'
 import { useTheme } from './useTheme'
 
 export function App() {
@@ -19,7 +25,12 @@ export function App() {
   const [models, setModels] = useState<string[]>([])
   const [model, setModel] = useState(saved.model)
   const [isShowingTraces, setIsShowingTraces] = useState(false)
+  const [draft, setDraft] = useState('')
+  const [isDiceRolling, setIsDiceRolling] = useState(false)
+  const { isDungeonMode, toggle: toggleDungeonMode } = useDungeonMode()
+  const { stats, addRoll, addCheck } = useDiceStats()
   const mainRef = useRef<HTMLElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const isStickingToBottom = useRef(true)
 
   useEffect(() => {
@@ -60,6 +71,35 @@ export function App() {
     void chat.send(text, model)
   }
 
+  const sendNow = (text: string) => {
+    handleSend(text)
+    setDraft(current => (current.trim() === text ? '' : current))
+  }
+
+  const check = useDungeonCheck({
+    canSend: !chat.isRunning && !!model,
+    onPass: sendNow,
+    onResult: addCheck,
+  })
+  const isRolling = check.phase !== 'idle' || isDiceRolling
+
+  useEffect(() => {
+    if (check.phase === 'idle') inputRef.current?.focus()
+  }, [check.phase])
+
+  /** Send, roll a check first (Dungeon mode) or do nothing. The text is sent exactly as typed. */
+  const handleSubmit = (text: string) => {
+    const action = gateSend({
+      dungeonMode: isDungeonMode,
+      isRunning: chat.isRunning,
+      isRolling,
+      isDisabled: !model,
+      text,
+    })
+    if (action === 'send') sendNow(text.trim())
+    if (action === 'roll') check.start(text.trim())
+  }
+
   const handleScroll = () => {
     if (mainRef.current)
       isStickingToBottom.current = isNearBottom(mainRef.current)
@@ -71,6 +111,7 @@ export function App() {
         models={models}
         model={model}
         theme={theme}
+        isDungeonMode={isDungeonMode}
         isShowingTraces={isShowingTraces}
         canCopyChat={chat.messages.length > 0}
         onCopyChat={handleCopyChat}
@@ -78,6 +119,7 @@ export function App() {
         onNewChat={chat.reset}
         onToggleTraces={() => setIsShowingTraces(value => !value)}
         onToggleTheme={toggleTheme}
+        onToggleDungeonMode={toggleDungeonMode}
       />
       <main
         ref={mainRef}
@@ -87,8 +129,8 @@ export function App() {
         {isShowingTraces && <TracesPanel />}
         {!isShowingTraces && chat.messages.length === 0 && (
           <Welcome
-            isDisabled={!model}
-            onPick={handleSend}
+            isDisabled={!model || isRolling}
+            onPick={handleSubmit}
           />
         )}
         {!isShowingTraces && (
@@ -107,17 +149,31 @@ export function App() {
       {!isShowingTraces && (
         <footer className="mx-auto w-full max-w-3xl p-4 pt-0">
           <DiceRoller
-            isDisabled={chat.isRunning || !model}
+            isDisabled={chat.isRunning || !model || check.phase !== 'idle'}
+            stats={stats}
             onSend={handleSend}
+            onRoll={addRoll}
+            onBusyChange={setIsDiceRolling}
           />
           <Composer
-            isDisabled={chat.isRunning || !model}
+            value={draft}
+            isDisabled={chat.isRunning || !model || isRolling}
             isRunning={chat.isRunning}
-            onSend={handleSend}
+            check={isDungeonMode ? { dc: DEFAULT_DC, mode: check.mode } : null}
+            inputRef={inputRef}
+            onChange={setDraft}
+            onSend={handleSubmit}
             onStop={chat.stop}
           />
         </footer>
       )}
+      <CheckOverlay
+        run={check.run}
+        phase={check.phase}
+        announcement={check.announcement}
+        onLand={check.land}
+        onClose={check.close}
+      />
       <QuivrMannetje model={model} />
     </div>
   )

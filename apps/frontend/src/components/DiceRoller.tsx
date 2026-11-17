@@ -1,27 +1,19 @@
-import {
-  useEffect,
-  useEffectEvent,
-  useRef,
-  useState,
-  type CSSProperties,
-} from 'react'
+import { useEffect, useEffectEvent, useRef, useState } from 'react'
 
+import { prefersReducedMotion } from '../dice/browser'
 import { confettiPieces, type ConfettiPiece } from '../dice/confetti'
-import {
-  EDGE,
-  FACES,
-  FACE_HEIGHT,
-  faceFor,
-  landTransform,
-  placeTransform,
-} from '../dice/geometry'
 import { formatRollMessage, promptForRoll } from '../dice/prompts'
 import { rollD20 } from '../dice/rollD20'
-import { formatStats, loadStats, recordRoll, saveStats } from '../dice/stats'
+import { formatStats, type DiceStats } from '../dice/stats'
+import { ConfettiShower, CONFETTI_COLOURS, DiceDie } from './DiceDie'
 
 type Props = {
   isDisabled: boolean
+  stats: DiceStats
   onSend: (text: string) => void
+  onRoll: (roll: number) => void
+  /** True while the roll overlay is open, so nothing else starts a roll underneath it. */
+  onBusyChange: (isBusy: boolean) => void
 }
 
 type Phase = 'idle' | 'rolling' | 'landed'
@@ -34,13 +26,6 @@ const CONFETTI_COUNT = 40
 const CONFETTI_MS = 3600
 const DISMISS_MS = 4500
 const JACKPOT_DISMISS_MS = 6000
-const CONFETTI_COLOURS = [
-  'var(--color-main)',
-  'var(--color-green-status)',
-  'var(--color-blue-pretty)',
-  'var(--color-danger)',
-  'var(--color-vegetarian)',
-]
 
 const outcomeOf = (roll: number): Outcome =>
   roll === 20 ? 'jackpot' : roll === 1 ? 'fail' : 'normal'
@@ -50,36 +35,6 @@ const OUTCOME_LABEL: Record<Outcome, string | null> = {
   fail: 'CRITICAL FAIL',
   normal: null,
 }
-
-const prefersReducedMotion = () =>
-  typeof window !== 'undefined' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-const noStorage = { getItem: () => null, setItem: () => undefined }
-const storage = () => {
-  try {
-    return window.localStorage
-  } catch {
-    return noStorage
-  }
-}
-
-const FACE_BOX: CSSProperties = {
-  width: EDGE,
-  height: FACE_HEIGHT,
-  left: `calc(50% - ${EDGE / 2}px)`,
-  top: `calc(50% - ${(FACE_HEIGHT * 2) / 3}px)`,
-  transformOrigin: '50% 66.6667%',
-}
-
-const FACE_STYLES = FACES.map(
-  (face, index) =>
-    ({
-      ...FACE_BOX,
-      transform: placeTransform(face),
-      '--tint': `${(index % 4) * 6}%`,
-    }) as CSSProperties
-)
 
 function MiniDie() {
   return (
@@ -98,19 +53,22 @@ function MiniDie() {
   )
 }
 
-export function DiceRoller({ isDisabled, onSend }: Props) {
+export function DiceRoller({
+  isDisabled,
+  stats,
+  onSend,
+  onRoll,
+  onBusyChange,
+}: Props) {
   const [phase, setPhase] = useState<Phase>('idle')
   const [roll, setRoll] = useState<number | null>(null)
   const [shown, setShown] = useState<number | null>(null)
   const [isReduced, setIsReduced] = useState(false)
   const [confetti, setConfetti] = useState<ConfettiPiece[]>([])
-  const [stats, setStats] = useState(() => loadStats(storage()))
   const closeRef = useRef<HTMLButtonElement>(null)
 
   const land = useEffectEvent((value: number, reduced: boolean) => {
-    const next = recordRoll(stats, value)
-    setStats(next)
-    saveStats(storage(), next)
+    onRoll(value)
     setShown(value)
     setConfetti(
       value === 20 && !reduced
@@ -120,6 +78,12 @@ export function DiceRoller({ isDisabled, onSend }: Props) {
     setPhase('landed')
     if (!isDisabled) onSend(formatRollMessage(value))
   })
+
+  const reportBusy = useEffectEvent(onBusyChange)
+
+  useEffect(() => {
+    reportBusy(phase !== 'idle')
+  }, [phase])
 
   useEffect(() => {
     if (phase !== 'rolling' || roll === null) return
@@ -172,10 +136,6 @@ export function DiceRoller({ isDisabled, onSend }: Props) {
   const outcome =
     roll === null || phase !== 'landed' ? 'normal' : outcomeOf(roll)
   const label = OUTCOME_LABEL[outcome]
-  const stageStyle = {
-    '--dice-ms': `${ROLL_MS}ms`,
-    '--dice-land': roll === null ? 'none' : landTransform(faceFor(roll)),
-  } as CSSProperties
 
   return (
     <>
@@ -192,7 +152,7 @@ export function DiceRoller({ isDisabled, onSend }: Props) {
         </button>
         <span
           className="text-muted text-xs"
-          title="Your rolls, natural 20s (🍀) and natural 1s (💀)"
+          title="Your rolls, natural 20s (🍀), natural 1s (💀) and Dungeon mode checks passed/rolled"
         >
           {formatStats(stats)}
         </span>
@@ -205,56 +165,17 @@ export function DiceRoller({ isDisabled, onSend }: Props) {
           onClick={close}
           className="dice-overlay fixed inset-0 z-40 flex items-center justify-center backdrop-blur-sm"
         >
-          {confetti.length > 0 && (
-            <div
-              className="dice-confetti"
-              aria-hidden="true"
-            >
-              {confetti.map((piece, index) => (
-                <span
-                  key={index}
-                  className="dice-confetti-piece"
-                  style={
-                    {
-                      left: `${piece.left}%`,
-                      width: piece.width,
-                      height: piece.height,
-                      backgroundColor: CONFETTI_COLOURS[piece.colour],
-                      '--drift': `${piece.drift}px`,
-                      '--dur': `${piece.durationMs}ms`,
-                      '--delay': `${piece.delayMs}ms`,
-                    } as CSSProperties
-                  }
-                />
-              ))}
-            </div>
-          )}
+          {confetti.length > 0 && <ConfettiShower pieces={confetti} />}
           <div
             className="dice-stage relative flex flex-col items-center gap-3 px-4 py-8"
             data-phase={phase}
             data-outcome={outcome}
-            style={stageStyle}
           >
-            <div
-              className="dice-die"
-              aria-hidden="true"
-            >
-              <div className="dice-ring" />
-              {outcome === 'jackpot' && <div className="dice-burst" />}
-              <div className="dice-throw">
-                <div className="dice-spin">
-                  {FACES.map((face, index) => (
-                    <div
-                      key={face.number}
-                      className="dice-face"
-                      style={FACE_STYLES[index]}
-                    >
-                      <span className="dice-face-number">{face.number}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <DiceDie
+              roll={roll}
+              ms={ROLL_MS}
+              hasBurst={outcome === 'jackpot'}
+            />
             <p
               aria-hidden="true"
               data-rolling={phase === 'rolling'}
