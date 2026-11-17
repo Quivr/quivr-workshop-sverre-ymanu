@@ -7,6 +7,7 @@ import { FIXTURES_DIR, loadConfig } from '../src/config.js'
 import { addDays, brusselsDate, datesBetween } from '../src/quivr/dates.js'
 import { fixtureKey, writeFixtures } from '../src/quivr/fixtures.js'
 import { QuivrClient } from '../src/quivr/quivr-client.js'
+import { PARTNER_CARDS_FETCH_COUNT } from '../src/tools/get-partner-deals.js'
 import { anonymise } from './anonymise.js'
 
 const DAYS_BEFORE = 2
@@ -44,6 +45,7 @@ for (const topic of [undefined, ...newsArticlesTopics]) {
 }
 await quivr.getStudentBars(true)
 await quivr.getStudentBars(false)
+await quivr.getPartnerCards(PARTNER_CARDS_FETCH_COUNT)
 for (const date of dates) {
   await quivr.getMySchedule(date)
   await Promise.all(friendList.map(f => quivr.getFriendSchedules([f.id], date)))

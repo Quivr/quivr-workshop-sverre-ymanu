@@ -1,0 +1,90 @@
+{
+  "{\"first\":50}": {
+    "partnerCards": {
+      "nodes": [
+        {
+          "id": "9101",
+          "isTemplate": false,
+          "dateValid": "2026-09-01T00:00:00+02:00",
+          "dateInvalid": "2036-12-31T23:59:00+01:00",
+          "company": {
+            "name": "Fake Pizzeria Alpha",
+            "description": "Example pizzeria used for workshop fixtures."
+          },
+          "translations": [
+            {
+              "locale": "EN",
+              "title": "Fake deal: 2 for 1 pizza on Mondays",
+              "body": "<p>Show your student card and get a <strong>second pizza free</strong> every Monday evening.</p>",
+              "footnote": null
+            },
+            {
+              "locale": "NL",
+              "title": "Nepdeal: 2 voor 1 pizza op maandag",
+              "body": "<p>Toon je studentenkaart.</p>",
+              "footnote": null
+            }
+          ],
+          "action": { "url": "https://example.invalid/deals/pizzeria-alpha" }
+        },
+        {
+          "id": "9102",
+          "isTemplate": false,
+          "dateValid": "2026-10-01T00:00:00+02:00",
+          "dateInvalid": "2036-12-31T23:59:00+01:00",
+          "company": {
+            "name": "Fake Café Beta",
+            "description": "Example café used for workshop fixtures."
+          },
+          "translations": [
+            {
+              "locale": "EN",
+              "title": "Fake deal: 10% off coffee",
+              "body": "<p>Students get 10% off any coffee or tea with a valid student card.</p>",
+              "footnote": "Not combinable with other offers."
+            }
+          ],
+          "action": null
+        },
+        {
+          "id": "9103",
+          "isTemplate": false,
+          "dateValid": "2026-09-15T00:00:00+02:00",
+          "dateInvalid": "2036-06-30T23:59:00+02:00",
+          "company": {
+            "name": "Fake Gym Gamma",
+            "description": "Example fitness centre used for workshop fixtures."
+          },
+          "translations": [
+            {
+              "locale": "EN",
+              "title": "Fake deal: student membership at a reduced price",
+              "body": "<p>Reduced monthly membership for students: first month half price.</p>",
+              "footnote": null
+            }
+          ],
+          "action": { "url": "https://example.invalid/deals/gym-gamma" }
+        },
+        {
+          "id": "9104",
+          "isTemplate": false,
+          "dateValid": "2025-01-01T00:00:00+01:00",
+          "dateInvalid": "2026-01-31T23:59:00+01:00",
+          "company": {
+            "name": "Fake Bookshop Delta",
+            "description": "Example bookshop used for workshop fixtures."
+          },
+          "translations": [
+            {
+              "locale": "EN",
+              "title": "Fake deal: expired book discount",
+              "body": "<p>This offer has ended.</p>",
+              "footnote": null
+            }
+          ],
+          "action": null
+        }
+      ]
+    }
+  }
+}
