@@ -50,7 +50,7 @@ export function MessageList({ messages, durations, isRunning }: Props) {
               />
             ))}
             {message.content && (
-              <div className="rounded-lg bg-white px-3 py-2 whitespace-pre-wrap shadow-sm">
+              <div className="bg-surface rounded-lg px-3 py-2 whitespace-pre-wrap shadow-sm">
                 {message.content}
               </div>
             )}

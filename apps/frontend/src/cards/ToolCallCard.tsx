@@ -16,10 +16,10 @@ export function ToolCallCard({
   const duration = durationMs === undefined ? '' : ` · ${durationMs} ms`
 
   return (
-    <details className="border-schedule-border-grey rounded-md border bg-white text-xs">
+    <details className="border-schedule-border-grey bg-surface rounded-md border text-xs">
       <summary className="cursor-pointer px-3 py-2">
         <span className="font-bold">🔧 {toolName}</span>
-        <span className={error ? 'text-danger' : 'text-sidenav-secondary'}>
+        <span className={error ? 'text-danger' : 'text-muted'}>
           {' '}
           {status}
           {duration}

@@ -1,10 +1,14 @@
+import type { Theme } from '../useTheme'
+
 type Props = {
   models: string[]
   model: string
+  theme: Theme
   isShowingTraces: boolean
   onModelChange: (model: string) => void
   onNewChat: () => void
   onToggleTraces: () => void
+  onToggleTheme: () => void
 }
 
 const buttonClass = 'rounded px-2 py-1 text-sm hover:bg-sidenav-secondary'
@@ -12,10 +16,12 @@ const buttonClass = 'rounded px-2 py-1 text-sm hover:bg-sidenav-secondary'
 export function Header({
   models,
   model,
+  theme,
   isShowingTraces,
   onModelChange,
   onNewChat,
   onToggleTraces,
+  onToggleTheme,
 }: Props) {
   return (
     <header className="bg-sidenav-blue flex flex-wrap items-center gap-3 px-4 py-2 text-white">
@@ -55,6 +61,16 @@ export function Header({
         className={buttonClass}
       >
         New chat
+      </button>
+      <button
+        type="button"
+        onClick={onToggleTheme}
+        className={buttonClass}
+        aria-label={
+          theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
+        }
+      >
+        {theme === 'dark' ? '☀️' : '🌙'}
       </button>
     </header>
   )
