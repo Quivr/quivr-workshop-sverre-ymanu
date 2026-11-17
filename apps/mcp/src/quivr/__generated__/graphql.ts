@@ -70,6 +70,19 @@ export type MyScheduleQuery = { scheduleItems: { scheduleItems: Array<
       | { __typename: 'RepeatedEventInstance', id: string, title: string, startTime: string, endTime: string, locations: Array<{ name: string | null, address: string | null }> | null }
     > } };
 
+export type NewsQueryVariables = Exact<{
+  first: number;
+  topic?: string | null | undefined;
+}>;
+
+
+export type NewsQuery = { newsArticlesV2: { nodes: Array<{ id: string, title: string, subtitle: string | null, summary: string, content: string, topic: string | null, url: string, datePublished: string, contentProviderName: string } | null> | null } };
+
+export type NewsTopicsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type NewsTopicsQuery = { newsArticlesTopics: Array<string> };
+
 export type RestaurantsQueryVariables = Exact<{ [key: string]: never; }>;
 
 

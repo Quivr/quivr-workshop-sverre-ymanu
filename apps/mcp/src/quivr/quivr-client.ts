@@ -15,6 +15,8 @@ import type {
   LibrariesQuery,
   MenuQuery,
   MyScheduleQuery,
+  NewsQuery,
+  NewsTopicsQuery,
   RestaurantsQuery,
 } from './__generated__/graphql.js'
 import { dayRange } from './dates.js'
@@ -70,6 +72,14 @@ export class QuivrClient {
       friendIds,
       timeRange: dayRange(date),
     })
+  }
+
+  getNews(first: number, topic?: string): Promise<NewsQuery> {
+    return this.request('News', { first, topic: topic ?? null })
+  }
+
+  getNewsTopics(): Promise<NewsTopicsQuery> {
+    return this.request('NewsTopics', {})
   }
 
   async request<T>(operationName: string, variables: object): Promise<T> {

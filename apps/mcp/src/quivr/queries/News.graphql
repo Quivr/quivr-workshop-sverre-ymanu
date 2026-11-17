@@ -1,0 +1,15 @@
+query News($first: Int!, $topic: String) {
+  newsArticlesV2(first: $first, topic: $topic) {
+    nodes {
+      id
+      title
+      subtitle
+      summary
+      content
+      topic
+      url
+      datePublished
+      contentProviderName
+    }
+  }
+}

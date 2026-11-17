@@ -5,6 +5,7 @@ import { getFriends } from './get-friends.js'
 import { getLibraryOccupancy } from './get-library-occupancy.js'
 import { getMenu } from './get-menu.js'
 import { getMySchedule } from './get-my-schedule.js'
+import { getNews } from './get-news.js'
 import { listRestaurants } from './list-restaurants.js'
 
 /** Every tool the MCP server exposes. Add new tools here. */
@@ -16,4 +17,5 @@ export const tools = [
   findDish,
   getFriends,
   findCommonFreeSlots,
+  getNews,
 ] as ToolDefinition[]

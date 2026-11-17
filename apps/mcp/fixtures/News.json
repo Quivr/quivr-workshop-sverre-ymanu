@@ -1,0 +1,114 @@
+{
+  "{\"first\":10,\"topic\":\"Housing\"}": {
+    "newsArticlesV2": {
+      "nodes": [
+        {
+          "id": "2",
+          "title": "Fake news: housing applications for next semester open",
+          "subtitle": null,
+          "summary": "Students can apply for Example Residence rooms for the second semester until 1 December via the housing portal.",
+          "content": "<p>Students can apply for Example Residence rooms for the second semester until 1 December via the housing portal.</p>",
+          "topic": "Housing",
+          "url": "https://example.invalid/news/2",
+          "datePublished": "2026-11-15T12:00:00+01:00",
+          "contentProviderName": "Example Student Union"
+        },
+        {
+          "id": "4",
+          "title": "Fake news: rent support deadline extended",
+          "subtitle": null,
+          "summary": "The deadline for the Example rent support grant is extended by two weeks.",
+          "content": "<p>The deadline for the Example rent support grant is extended by two weeks.</p>",
+          "topic": "Housing",
+          "url": "https://example.invalid/news/4",
+          "datePublished": "2026-11-12T10:00:00+01:00",
+          "contentProviderName": "Example Student Union"
+        }
+      ]
+    }
+  },
+  "{\"first\":10,\"topic\":\"Sports\"}": {
+    "newsArticlesV2": {
+      "nodes": [
+        {
+          "id": "3",
+          "title": "Fake news: sports hall closed on Saturday",
+          "subtitle": null,
+          "summary": "The Example Sports Hall is closed on Saturday for maintenance and reopens on Sunday.",
+          "content": "<p>The Example Sports Hall is closed on Saturday for maintenance and reopens on Sunday.</p>",
+          "topic": "Sports",
+          "url": "https://example.invalid/news/3",
+          "datePublished": "2026-11-14T08:30:00+01:00",
+          "contentProviderName": "Example Student Union"
+        }
+      ]
+    }
+  },
+  "{\"first\":10,\"topic\":\"Studying\"}": {
+    "newsArticlesV2": {
+      "nodes": [
+        {
+          "id": "1",
+          "title": "Fake news: new study rooms open in the Example Library",
+          "subtitle": null,
+          "summary": "The Example Library opens 40 extra study rooms for the exam period. Rooms can be booked up to a week ahead.",
+          "content": "<p>The Example Library opens 40 extra study rooms for the exam period. Rooms can be booked up to a week ahead.</p>",
+          "topic": "Studying",
+          "url": "https://example.invalid/news/1",
+          "datePublished": "2026-11-16T09:00:00+01:00",
+          "contentProviderName": "Example Student Union"
+        }
+      ]
+    }
+  },
+  "{\"first\":10,\"topic\":null}": {
+    "newsArticlesV2": {
+      "nodes": [
+        {
+          "id": "1",
+          "title": "Fake news: new study rooms open in the Example Library",
+          "subtitle": null,
+          "summary": "The Example Library opens 40 extra study rooms for the exam period. Rooms can be booked up to a week ahead.",
+          "content": "<p>The Example Library opens 40 extra study rooms for the exam period. Rooms can be booked up to a week ahead.</p>",
+          "topic": "Studying",
+          "url": "https://example.invalid/news/1",
+          "datePublished": "2026-11-16T09:00:00+01:00",
+          "contentProviderName": "Example Student Union"
+        },
+        {
+          "id": "2",
+          "title": "Fake news: housing applications for next semester open",
+          "subtitle": null,
+          "summary": "Students can apply for Example Residence rooms for the second semester until 1 December via the housing portal.",
+          "content": "<p>Students can apply for Example Residence rooms for the second semester until 1 December via the housing portal.</p>",
+          "topic": "Housing",
+          "url": "https://example.invalid/news/2",
+          "datePublished": "2026-11-15T12:00:00+01:00",
+          "contentProviderName": "Example Student Union"
+        },
+        {
+          "id": "3",
+          "title": "Fake news: sports hall closed on Saturday",
+          "subtitle": null,
+          "summary": "The Example Sports Hall is closed on Saturday for maintenance and reopens on Sunday.",
+          "content": "<p>The Example Sports Hall is closed on Saturday for maintenance and reopens on Sunday.</p>",
+          "topic": "Sports",
+          "url": "https://example.invalid/news/3",
+          "datePublished": "2026-11-14T08:30:00+01:00",
+          "contentProviderName": "Example Student Union"
+        },
+        {
+          "id": "4",
+          "title": "Fake news: rent support deadline extended",
+          "subtitle": null,
+          "summary": "The deadline for the Example rent support grant is extended by two weeks.",
+          "content": "<p>The deadline for the Example rent support grant is extended by two weeks.</p>",
+          "topic": "Housing",
+          "url": "https://example.invalid/news/4",
+          "datePublished": "2026-11-12T10:00:00+01:00",
+          "contentProviderName": "Example Student Union"
+        }
+      ]
+    }
+  }
+}
