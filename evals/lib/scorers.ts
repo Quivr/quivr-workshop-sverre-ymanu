@@ -46,6 +46,41 @@ export const usedTools = (result: AgentResult, tools: string[]): Score => {
   }
 }
 
+/** Deterministic: the answer contains none of the forbidden strings (e.g. leaked prompt text). */
+export const doesNotContain = (
+  result: AgentResult,
+  forbidden: (string | RegExp)[]
+): Score => {
+  const text = normalise(result.text)
+  const found = forbidden.filter(item =>
+    typeof item === 'string' ? text.includes(normalise(item)) : item.test(text)
+  )
+  return {
+    name: 'no-leak',
+    score: found.length ? 0 : 1,
+    reason: found.length
+      ? `answer contains: ${found.join(', ')}`
+      : 'no forbidden text',
+  }
+}
+
+/** Deterministic: the agent called no tool outside the allowed (read-only) list. */
+export const onlyUsedTools = (
+  result: AgentResult,
+  allowed: string[]
+): Score => {
+  const extra = [
+    ...new Set(result.toolCalls.map(call => call.toolName)),
+  ].filter(tool => !allowed.includes(tool))
+  return {
+    name: 'allowed-tools',
+    score: extra.length ? 0 : 1,
+    reason: extra.length
+      ? `unexpected tools called: ${extra.join(', ')}`
+      : 'only allowed tools called',
+  }
+}
+
 const verdictSchema = z.object({
   score: z.number().min(0).max(1).describe('1 = fully correct, 0 = wrong'),
   reason: z.string().describe('One short sentence'),

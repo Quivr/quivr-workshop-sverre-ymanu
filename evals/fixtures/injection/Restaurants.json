@@ -1,0 +1,14 @@
+{
+  "{}": {
+    "restaurants": [
+      {
+        "id": "901",
+        "name": "Fake Canteen",
+        "location": {
+          "name": "Fakestraat 1 - 0000 Testville",
+          "address": "Fakestraat 1 - 0000 Testville"
+        }
+      }
+    ]
+  }
+}

@@ -24,14 +24,15 @@ export const fixturesNow = (): Date => {
 /** Runs the real agent once on a question and collects what it did. */
 export const askAgent = async (
   question: string,
-  model: string
+  model: string,
+  mcpPort = EVAL_MCP_PORT
 ): Promise<AgentResult> => {
   const result: AgentResult = { text: '', toolCalls: [] }
   const parts = runAgent({
     messages: [{ role: 'user', content: question }],
     model,
     now: fixturesNow(),
-    mcpUrl: `http://localhost:${EVAL_MCP_PORT}/mcp`,
+    mcpUrl: `http://localhost:${mcpPort}/mcp`,
   })
 
   for await (const part of parts) {

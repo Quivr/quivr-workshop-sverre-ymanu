@@ -4,10 +4,13 @@ import { parseEnv } from 'node:util'
 
 export const ROOT_DIR = join(import.meta.dirname, '../../..')
 export const ENV_FILE = join(ROOT_DIR, '.env')
-export const FIXTURES_DIR = join(import.meta.dirname, '../fixtures')
 export const QUERIES_DIR = join(import.meta.dirname, 'quivr/queries')
 
 if (existsSync(ENV_FILE)) process.loadEnvFile(ENV_FILE)
+
+/** Recorded responses for QUIVR_MODE=fixtures. QUIVR_FIXTURES_DIR swaps in another set (the injection evals). */
+export const FIXTURES_DIR =
+  process.env.QUIVR_FIXTURES_DIR ?? join(import.meta.dirname, '../fixtures')
 
 export type QuivrMode = 'live' | 'fixtures'
 
