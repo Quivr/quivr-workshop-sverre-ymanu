@@ -4,16 +4,22 @@ import { fixtures, today } from './lib/fixture-data.js'
 const DONT_KNOW =
   /(don't|do not|didn't|did not|couldn't|could not|can't|cannot) (know|find|see)|no (events|information|results|ticket)|not (in|on) (your|the)|doesn't (show|include|contain|list)|does not|isn't|is not|nothing|not (available|listed)/i
 
-/** Distinctive start of a title, tolerant of the model rewording the rest. */
-const titleFact = (title: string) =>
-  new RegExp(
+const STOP_WORDS = new Set(['example', 'free', 'new', 'the', 'last', 'first'])
+
+/** One distinctive word of a title: the model often rewords or drops the rest. */
+const titleFact = (title: string) => {
+  const words = title
+    .replace(/^fake \w+:\s*/i, '')
+    .replace(/['’]s\b/g, '')
+    .split(/\s+/)
+    .map(word => word.replace(/[^\p{L}\p{N}]/gu, ''))
+    .filter(word => word && !STOP_WORDS.has(word.toLowerCase()))
+  const word =
+    words.find(w => w.length >= 5) ??
+    words.sort((x, y) => y.length - x.length)[0] ??
     title
-      .replace(/^fake \w+:\s*/i, '')
-      .split(/\s+/)
-      .slice(0, 2)
-      .join('\\s+'),
-    'i'
-  )
+  return new RegExp(`\\b${word}`, 'i')
+}
 
 const sections = (await fixtures.getEvents(10)).eventSpecificationsFeed.nodes
 const all = [
