@@ -100,6 +100,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ai-sdk/openai@npm:4.0.118":
+  version: 4.0.118
+  resolution: "@ai-sdk/openai@npm:4.0.118"
+  dependencies:
+    "@ai-sdk/provider": "npm:4.0.38"
+    "@ai-sdk/provider-utils": "npm:5.0.81"
+  peerDependencies:
+    zod: ^3.25.76 || ^4.1.8
+  checksum: 10c0/301072cfac417da2ce0277228cfc691351a8934478f08ff8e256d6eb8e7c3352a04456fa0512b1be652f4eb64145d12dcafe74c82cefe1f8a9e88ead96570180
+  languageName: node
+  linkType: hard
+
 "@ai-sdk/provider-utils@npm:5.0.79":
   version: 5.0.79
   resolution: "@ai-sdk/provider-utils@npm:5.0.79"
@@ -115,12 +127,35 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ai-sdk/provider-utils@npm:5.0.81":
+  version: 5.0.81
+  resolution: "@ai-sdk/provider-utils@npm:5.0.81"
+  dependencies:
+    "@ai-sdk/provider": "npm:4.0.38"
+    "@standard-schema/spec": "npm:^1.1.0"
+    "@workflow/serde": "npm:4.1.0"
+    eventsource-parser: "npm:^3.0.8"
+  peerDependencies:
+    zod: ^3.25.76 || ^4.1.8
+  checksum: 10c0/ebf4e8f3e17b19e520c74a999520bbd80d6ec0cc87aaf9ba2fea6131b07926ed399a2381a4a9b159999788a287f550ba29e402138dd9874f31cc348bee487421
+  languageName: node
+  linkType: hard
+
 "@ai-sdk/provider@npm:4.0.37":
   version: 4.0.37
   resolution: "@ai-sdk/provider@npm:4.0.37"
   dependencies:
     json-schema: "npm:^0.4.0"
   checksum: 10c0/22f8a0478fbd987f68fb7698363386c9683efb4078c01f9b72dd63183fe45db3bbac84d15e4bfe052ab5bd237a33f74ec674dd14f0daba5375c336030539ec1b
+  languageName: node
+  linkType: hard
+
+"@ai-sdk/provider@npm:4.0.38":
+  version: 4.0.38
+  resolution: "@ai-sdk/provider@npm:4.0.38"
+  dependencies:
+    json-schema: "npm:^0.4.0"
+  checksum: 10c0/700b56f31bbb1706f976a9c9cae7919d61559a64ea422d92971d4b23bea66e51a5dc344c8e58827b1425dda5a2fbe3d39e49ca12a9901d148e0b21daaa9c41a0
   languageName: node
   linkType: hard
 
@@ -3245,6 +3280,7 @@ __metadata:
     "@ag-ui/encoder": "npm:1.0.4"
     "@ai-sdk/anthropic": "npm:4.0.102"
     "@ai-sdk/mcp": "npm:2.0.96"
+    "@ai-sdk/openai": "npm:4.0.118"
     "@nestjs/common": "npm:12.4.2"
     "@nestjs/core": "npm:12.4.2"
     "@nestjs/platform-express": "npm:12.4.2"

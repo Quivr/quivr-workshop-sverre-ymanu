@@ -69,12 +69,15 @@ Tools are listed over MCP, so a new tool in `apps/mcp` shows up in the agent wit
 | Variable                              | Meaning                                                                                         |
 | ------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | `ANTHROPIC_API_KEY`                   | Your group's key.                                                                               |
+| `OPENAI_API_KEY`                      | Optional. Needed only if you add an `openai:<model>` id to `ALLOWED_MODELS`.                    |
 | `ALLOWED_MODELS`, `DEFAULT_MODEL`     | Models the chat may use (`provider:model`). The dropdown shows them.                            |
 | `JUDGE_MODEL`                         | Model for the LLM-as-judge scorer.                                                              |
 | `QUIVR_MODE`                          | `live` (real backend) or `fixtures` (recorded data).                                            |
 | `QUIVR_READ_ONLY`                     | `true` blocks every GraphQL mutation in `QuivrClient`. Set `false` only to really send invites. |
 | `QUIVR_BASE_URL`                      | Quivr backend, beta by default.                                                                 |
 | `QUIVR_AUTHORIZATION`, `QUIVR_UID`, … | Written by `just login`.                                                                        |
+
+To compare with OpenAI, set `OPENAI_API_KEY` and add e.g. `openai:<model>` to `ALLOWED_MODELS` (and optionally `JUDGE_MODEL`, or `EVAL_MODELS` for the evals). Without the key, picking an `openai:` model fails with a clear error, and `just doctor` flags it. Other providers go in `apps/agent/src/models.ts`.
 
 ## Commands
 
