@@ -7,7 +7,7 @@ const MAX_LIMIT = 10
 const DEFAULT_LIMIT = 5
 const TEASER_LENGTH = 240
 
-const stripHtml = (html: string) =>
+export const stripHtml = (html: string) =>
   html
     .replace(/<[^>]*>/g, ' ')
     .replace(/&nbsp;/g, ' ')

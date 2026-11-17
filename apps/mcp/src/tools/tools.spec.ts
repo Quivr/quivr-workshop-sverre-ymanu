@@ -7,6 +7,7 @@ import { getLibraryOccupancy } from './get-library-occupancy.js'
 import { getMenu } from './get-menu.js'
 import { getMySchedule } from './get-my-schedule.js'
 import { findCommonFreeSlots } from './find-common-free-slots.js'
+import { getEvents } from './get-events.js'
 import { getFriends } from './get-friends.js'
 import { getNews } from './get-news.js'
 import { getPartnerDeals } from './get-partner-deals.js'
@@ -589,6 +590,160 @@ describe('get_partner_deals', () => {
     const result = await getPartnerDeals.run({}, quivr)
 
     expect(result).toMatchObject({ total: 0, deals: [] })
+  })
+})
+
+describe('get_events', () => {
+  const event = (id: string, startTime: string, overrides: object = {}) => ({
+    id,
+    title: `Event ${id}`,
+    description: `Description ${id}`,
+    startTime,
+    endTime: startTime.replace(/T\d\d/, 'T23'),
+    url: `https://example.invalid/events/${id}`,
+    locations: [{ name: 'Example Hall', address: 'Example Street 1' }],
+    companies: [{ name: 'Example Society' }],
+    registration: {
+      soldOut: false,
+      ticketKinds: [{ name: 'Entry', priceCents: 550, soldOut: false }],
+    },
+    ...overrides,
+  })
+
+  const eventsQuivr = (...sections: object[][]) =>
+    fakeQuivr({
+      getEvents: async () =>
+        ({
+          eventSpecificationsFeed: {
+            nodes: sections.map((nodes, index) => ({
+              id: String(index),
+              kind: 'DATE',
+              title: `Section ${index}`,
+              eventSpecifications: { nodes },
+            })),
+          },
+        }) as never,
+    })
+
+  it('returns compact events sorted by start, deduplicated across sections', async () => {
+    const quivr = eventsQuivr(
+      [event('b', '2026-11-19T20:00:00+01:00')],
+      [
+        event('a', '2026-11-18T20:00:00+01:00'),
+        event('b', '2026-11-19T20:00:00+01:00'),
+      ]
+    )
+
+    const result = await getEvents.run({}, quivr)
+
+    expect(result).toEqual({
+      from: undefined,
+      total: 2,
+      events: [
+        {
+          id: 'a',
+          title: 'Event a',
+          start: '2026-11-18T20:00:00+01:00',
+          end: '2026-11-18T23:00:00+01:00',
+          location: 'Example Hall',
+          organiser: 'Example Society',
+          description: 'Description a',
+          tickets: [{ name: 'Entry', price: '€5.50', soldOut: false }],
+          url: 'https://example.invalid/events/a',
+        },
+        expect.objectContaining({ id: 'b' }),
+      ],
+    })
+  })
+
+  it('drops events that ended before the from date', async () => {
+    const quivr = eventsQuivr([
+      event('past', '2026-11-14T20:00:00+01:00'),
+      event('ends-on-from', '2026-11-16T20:00:00+01:00'),
+      event('later', '2026-11-20T20:00:00+01:00'),
+    ])
+
+    const result = (await getEvents.run({ from: '2026-11-16' }, quivr)) as {
+      total: number
+      events: { id: string }[]
+    }
+
+    expect(result.events.map(e => e.id)).toEqual(['ends-on-from', 'later'])
+    expect(result.total).toBe(2)
+  })
+
+  it('strips html, caps the description and handles missing fields', async () => {
+    const quivr = eventsQuivr([
+      event('1', '2026-11-18T20:00:00+01:00', {
+        description: `<p>Party&nbsp;<b>time</b> &amp; ${'x'.repeat(400)}</p>`,
+      }),
+      event('2', '2026-11-19T20:00:00+01:00', {
+        description: '',
+        url: null,
+        locations: [],
+        companies: [],
+        registration: null,
+      }),
+      event('3', '2026-11-20T20:00:00+01:00', {
+        locations: [{ name: null, address: 'Example Street 2' }],
+        registration: {
+          soldOut: true,
+          ticketKinds: [{ name: 'Free', priceCents: 0, soldOut: true }],
+        },
+      }),
+    ])
+
+    const result = (await getEvents.run({}, quivr)) as {
+      events: Record<string, unknown>[]
+    }
+
+    expect(result.events[0]?.description).toMatch(/^Party time & x+…$/)
+    expect(
+      (result.events[0]?.description as string).length
+    ).toBeLessThanOrEqual(201)
+    expect(result.events[1]).toEqual({
+      id: '2',
+      title: 'Event 2',
+      start: '2026-11-19T20:00:00+01:00',
+      end: '2026-11-19T23:00:00+01:00',
+    })
+    expect(result.events[2]).toMatchObject({
+      location: 'Example Street 2',
+      tickets: [{ name: 'Free', price: 'free', soldOut: true }],
+    })
+  })
+
+  it('applies the limit but reports the total', async () => {
+    const quivr = eventsQuivr(
+      Array.from({ length: 12 }, (_, n) =>
+        event(String(n), `2026-11-${10 + n}T20:00:00+01:00`)
+      )
+    )
+
+    const defaults = (await getEvents.run({}, quivr)) as {
+      total: number
+      events: unknown[]
+    }
+    const two = (await getEvents.run({ limit: 2 }, quivr)) as {
+      events: unknown[]
+    }
+
+    expect(defaults.events).toHaveLength(8)
+    expect(defaults.total).toBe(12)
+    expect(two.events).toHaveLength(2)
+    expect(getEvents.inputSchema.limit?.safeParse(21).success).toBe(false)
+  })
+
+  it('handles an empty feed and empty sections', async () => {
+    expect(await getEvents.run({}, eventsQuivr())).toEqual({
+      from: undefined,
+      total: 0,
+      events: [],
+    })
+    expect(await getEvents.run({}, eventsQuivr([], []))).toMatchObject({
+      total: 0,
+      events: [],
+    })
   })
 })
 

@@ -49,6 +49,44 @@ export type EventInviteInput = {
 };
 
 /**
+ * The kind of this event specification section. All event specifications in this section
+ * are related to the section kind.
+ *
+ */
+export type EventSpecificationSectionKindEnum =
+  /**
+   * A section that contains event specifications related to a specific company.
+   *
+   */
+  | 'COMPANY'
+  /**
+   * A section that contains event specifications related to a specific date.
+   * For example, a section for all events happening 'Today'.
+   *
+   */
+  | 'DATE'
+  /**
+   * A section that contains personalized event specifications, such as those tailored to the user's interests.
+   *
+   */
+  | 'PERSONALIZED'
+  /**
+   * A section that contains popular event specifications. (Trending, etc.)
+   *
+   */
+  | 'POPULAR'
+  /**
+   * A section that contains event specifications related to a specific tag.
+   *
+   */
+  | 'TAG'
+  /**
+   * A section that contains event specifications which have ticket sales.
+   *
+   */
+  | 'TICKET_SALE';
+
+/**
  * Describes a locale.
  *
  */
@@ -107,6 +145,16 @@ export type EventSchedulesQuery = { schedules: Array<
     | { id: string, title: string | null }
     | { id: string, title: string | null }
   > };
+
+export type EventsQueryVariables = Exact<{
+  first: number;
+}>;
+
+
+export type EventsQuery = { eventSpecificationsFeed: { nodes: Array<{ id: string, kind: EventSpecificationSectionKindEnum, title: string, eventSpecifications: { nodes: Array<
+          | { id: string, title: string, description: string, startTime: string, endTime: string, url: string | null, locations: Array<{ name: string | null, address: string | null }>, companies: Array<{ name: string }>, registration: { soldOut: boolean, ticketKinds: Array<{ name: string, priceCents: number, soldOut: boolean }> } | null }
+          | { id: string, title: string, description: string, startTime: string, endTime: string, url: string | null, locations: Array<{ name: string | null, address: string | null }>, companies: Array<{ name: string }>, registration: { soldOut: boolean, ticketKinds: Array<{ name: string, priceCents: number, soldOut: boolean }> } | null }
+         | null> | null } } | null> | null } };
 
 export type FakbarsQueryVariables = Exact<{
   onlyShowOpen?: boolean | null | undefined;

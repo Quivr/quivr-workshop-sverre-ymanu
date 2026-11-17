@@ -13,6 +13,7 @@ import { anonymise } from './anonymise.js'
 const DAYS_BEFORE = 2
 const DAYS_AFTER = 13
 const NEWS_FETCH_COUNT = 10 // keep in sync with tools/get-news.ts
+const EVENTS_FETCH_COUNT = 10 // keep in sync with tools/get-events.ts
 
 faker.seed(42)
 const recorded = new Map<string, Record<string, unknown>>()
@@ -43,6 +44,7 @@ const { newsArticlesTopics } = await quivr.getNewsTopics()
 for (const topic of [undefined, ...newsArticlesTopics]) {
   await quivr.getNews(NEWS_FETCH_COUNT, topic)
 }
+await quivr.getEvents(EVENTS_FETCH_COUNT)
 await quivr.getStudentBars(true)
 await quivr.getStudentBars(false)
 await quivr.getPartnerCards(PARTNER_CARDS_FETCH_COUNT)
