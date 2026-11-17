@@ -1,3 +1,4 @@
+// dark-mode-ok-file: the mascot is brand artwork with fixed Quivr yellow/blue; its speech bubbles sit on bg-main
 import {
   useCallback,
   useEffect,

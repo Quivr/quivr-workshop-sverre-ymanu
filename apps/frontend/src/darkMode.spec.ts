@@ -40,6 +40,8 @@ const DENIED: [RegExp, string][] = [
 
 /** A line is allowed when it or one of the 3 lines before it has this marker plus a reason. */
 const ALLOW = /dark-mode-ok:\s*\S/
+/** A whole file is exempt when it has this marker plus a reason (e.g. fixed-colour mascot artwork). */
+const ALLOW_FILE = /dark-mode-ok-file:\s*\S/
 
 describe('dark mode', () => {
   it('finds the frontend components', () => {
@@ -49,6 +51,7 @@ describe('dark mode', () => {
   it('has no light-only colour classes in components', () => {
     const problems: string[] = []
     for (const [file, source] of Object.entries(sources)) {
+      if (ALLOW_FILE.test(source)) continue
       const lines = source.split('\n')
       lines.forEach((line, index) => {
         if (
