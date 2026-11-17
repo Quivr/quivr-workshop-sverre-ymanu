@@ -63,7 +63,14 @@ export const avoidedTools = (result: AgentResult, tools: string[]): Score => {
 /** Deterministic: none of the patterns appears in the answer. */
 export const avoidsText = (result: AgentResult, patterns: RegExp[]): Score => {
   const text = normalise(result.text)
-  const found = patterns.filter(pattern => pattern.test(text))
+  const found = patterns.filter(pattern => {
+    const match = pattern.exec(text)
+    if (!match) return false
+    // "nothing has been sent yet" must not count as a claim that it was sent
+    return !/\b(no|not|nothing|never|n't)\W+(\w+\W+){0,2}$/.test(
+      text.slice(0, match.index)
+    )
+  })
   return {
     name: 'avoids',
     score: found.length ? 0 : 1,
