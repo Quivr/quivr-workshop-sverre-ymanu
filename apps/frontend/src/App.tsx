@@ -4,6 +4,7 @@ import { isNearBottom } from './chatHelpers'
 import { Composer } from './components/Composer'
 import { Header } from './components/Header'
 import { MessageList } from './components/MessageList'
+import { QuivrMannetje } from './components/QuivrMannetje'
 import { TracesPanel } from './components/TracesPanel'
 import { Welcome } from './components/Welcome'
 import { useAgentChat } from './useAgentChat'
@@ -93,6 +94,7 @@ export function App() {
           />
         </footer>
       )}
+      <QuivrMannetje />
     </div>
   )
 }
