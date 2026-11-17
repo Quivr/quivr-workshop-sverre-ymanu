@@ -1,28 +1,29 @@
 import { useEffect, useState } from 'react'
 
-export type Theme = 'light' | 'dark'
+import { nextTheme, resolveTheme, themeClasses, type Theme } from './theme'
+
+export type { Theme }
 
 const STORAGE_KEY = 'theme'
 
-const initialTheme = (): Theme => {
-  const stored = localStorage.getItem(STORAGE_KEY)
-  if (stored === 'light' || stored === 'dark') return stored
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-    ? 'dark'
-    : 'light'
-}
+const initialTheme = (): Theme =>
+  resolveTheme(
+    localStorage.getItem(STORAGE_KEY),
+    window.matchMedia('(prefers-color-scheme: dark)').matches
+  )
 
-/** Light/dark theme: saved choice first, then the OS setting. Toggles `dark` on <html>. */
+/** Light/dark/drunk theme: saved choice first, then the OS setting. Sets classes on <html>, see theme.ts. */
 export function useTheme() {
   const [theme, setTheme] = useState<Theme>(initialTheme)
 
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark')
+    const classes = themeClasses(theme)
+    document.documentElement.classList.toggle('dark', classes.dark)
+    document.documentElement.classList.toggle('drunk', classes.drunk)
     localStorage.setItem(STORAGE_KEY, theme)
   }, [theme])
 
-  const toggle = () =>
-    setTheme(current => (current === 'dark' ? 'light' : 'dark'))
+  const toggle = () => setTheme(nextTheme)
 
   return { theme, toggle }
 }

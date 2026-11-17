@@ -13,14 +13,17 @@
     />
     <title>Ask Quivr</title>
     <script>
-      // Set the theme before first paint to avoid a light flash (keep in sync with useTheme.ts)
+      // Set the theme before first paint to avoid a light flash (keep in sync with theme.ts)
       try {
         var stored = localStorage.getItem('theme')
+        var isDrunk = stored === 'drunk'
         var isDark =
+          isDrunk ||
           stored === 'dark' ||
           (stored !== 'light' &&
             window.matchMedia('(prefers-color-scheme: dark)').matches)
         document.documentElement.classList.toggle('dark', isDark)
+        document.documentElement.classList.toggle('drunk', isDrunk)
       } catch (e) {}
     </script>
   </head>
