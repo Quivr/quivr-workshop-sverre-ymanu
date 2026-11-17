@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
 import { isNearBottom } from './chatHelpers'
+import { loadChat, saveChat, toMarkdown } from './chatStorage'
 import { Composer } from './components/Composer'
 import { Header } from './components/Header'
 import { MessageList } from './components/MessageList'
@@ -10,10 +11,11 @@ import { useAgentChat } from './useAgentChat'
 import { useTheme } from './useTheme'
 
 export function App() {
-  const chat = useAgentChat()
+  const [saved] = useState(loadChat)
+  const chat = useAgentChat(saved.messages)
   const { theme, toggle: toggleTheme } = useTheme()
   const [models, setModels] = useState<string[]>([])
-  const [model, setModel] = useState('')
+  const [model, setModel] = useState(saved.model)
   const [isShowingTraces, setIsShowingTraces] = useState(false)
   const mainRef = useRef<HTMLElement>(null)
   const isStickingToBottom = useRef(true)
@@ -31,10 +33,25 @@ export function App() {
       )
       .then(body => {
         setModels(body.models)
-        setModel(body.defaultModel)
+        setModel(current =>
+          body.models.includes(current) ? current : body.defaultModel
+        )
       })
       .catch(() => setModels([]))
   }, [])
+
+  useEffect(() => {
+    if (!chat.isRunning) saveChat(chat.messages, model)
+  }, [chat.messages, chat.isRunning, model])
+
+  const handleCopyChat = async () => {
+    try {
+      await navigator.clipboard.writeText(toMarkdown(chat.messages))
+      return true
+    } catch {
+      return false
+    }
+  }
 
   const handleSend = (text: string) => {
     isStickingToBottom.current = true
@@ -53,6 +70,8 @@ export function App() {
         model={model}
         theme={theme}
         isShowingTraces={isShowingTraces}
+        canCopyChat={chat.messages.length > 0}
+        onCopyChat={handleCopyChat}
         onModelChange={setModel}
         onNewChat={chat.reset}
         onToggleTraces={() => setIsShowingTraces(value => !value)}

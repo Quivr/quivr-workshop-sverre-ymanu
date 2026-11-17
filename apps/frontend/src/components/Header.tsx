@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react'
+
 import type { Theme } from '../useTheme'
 
 type Props = {
@@ -5,6 +7,8 @@ type Props = {
   model: string
   theme: Theme
   isShowingTraces: boolean
+  canCopyChat: boolean
+  onCopyChat: () => Promise<boolean>
   onModelChange: (model: string) => void
   onNewChat: () => void
   onToggleTraces: () => void
@@ -18,11 +22,24 @@ export function Header({
   model,
   theme,
   isShowingTraces,
+  canCopyChat,
+  onCopyChat,
   onModelChange,
   onNewChat,
   onToggleTraces,
   onToggleTheme,
 }: Props) {
+  const [copyState, setCopyState] = useState<'copied' | 'failed' | null>(null)
+
+  useEffect(() => {
+    if (!copyState) return
+    const timer = setTimeout(() => setCopyState(null), 2000)
+    return () => clearTimeout(timer)
+  }, [copyState])
+
+  const handleCopy = async () =>
+    setCopyState((await onCopyChat()) ? 'copied' : 'failed')
+
   return (
     <header className="bg-sidenav-blue flex flex-wrap items-center gap-3 px-4 py-2 text-white">
       <img
@@ -55,6 +72,20 @@ export function Header({
       >
         {isShowingTraces ? 'Chat' : 'Traces'}
       </button>
+      {canCopyChat && !isShowingTraces && (
+        <button
+          type="button"
+          onClick={() => void handleCopy()}
+          className={buttonClass}
+          aria-live="polite"
+        >
+          {copyState === 'copied'
+            ? 'Copied'
+            : copyState === 'failed'
+              ? 'Copy failed'
+              : 'Copy chat'}
+        </button>
+      )}
       <button
         type="button"
         onClick={onNewChat}

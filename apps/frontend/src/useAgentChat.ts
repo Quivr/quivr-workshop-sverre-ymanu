@@ -6,12 +6,13 @@ import { withoutUnansweredToolCalls } from './chatHelpers'
 
 const TOOL_TIMING_EVENT = 'tool_timing'
 
-const newAgent = () => new HttpAgent({ url: '/api/agent' })
+const newAgent = (initialMessages: Message[] = []) =>
+  new HttpAgent({ url: '/api/agent', initialMessages })
 
-/** Chat state on top of an AG-UI HttpAgent. Memory only: "new chat" forgets everything. */
-export const useAgentChat = () => {
-  const agentRef = useRef(newAgent())
-  const [messages, setMessages] = useState<Message[]>([])
+/** Chat state on top of an AG-UI HttpAgent, optionally continuing from restored messages. */
+export const useAgentChat = (initialMessages: Message[] = []) => {
+  const agentRef = useRef(newAgent(initialMessages))
+  const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [isRunning, setIsRunning] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [durations, setDurations] = useState<Record<string, number>>({})
