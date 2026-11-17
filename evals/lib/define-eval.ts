@@ -1,9 +1,10 @@
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 import { config } from 'agent/config'
 import { afterAll, describe, expect, it } from 'vitest'
 
+import { mergeResults, type CaseRecord } from './report.js'
 import { askAgent } from './run.js'
 import {
   avoidedTools,
@@ -37,12 +38,7 @@ export type EvalCase = {
   avoid?: RegExp[]
 }
 
-type CaseResult = {
-  case: string
-  model: string
-  answer: string
-  scores: Score[]
-}
+type CaseResult = CaseRecord & { scores: Score[] }
 
 const RESULTS_DIR = join(import.meta.dirname, '../results')
 
@@ -107,6 +103,9 @@ export const defineEval = (
           model,
           answer: result.text,
           scores,
+          latencyMs: result.latencyMs,
+          toolCallCount: result.toolCalls.length,
+          usage: result.usage,
         })
 
         const report = scores
@@ -123,8 +122,16 @@ export const defineEval = (
   }
 
   afterAll(() => {
-    const summary = models().map(model => {
-      const forModel = results.filter(r => r.model === model)
+    // Merge into the stored file: running one model or case must not erase
+    // the results of other models for the same suite.
+    const file = join(RESULTS_DIR, `${suite}.json`)
+    const stored = existsSync(file)
+      ? ((JSON.parse(readFileSync(file, 'utf8')) as { results?: CaseResult[] })
+          .results ?? [])
+      : []
+    const merged = mergeResults(stored, results)
+    const summary = [...new Set(merged.map(r => r.model))].sort().map(model => {
+      const forModel = merged.filter(r => r.model === model)
       return {
         model,
         cases: forModel.length,
@@ -136,8 +143,8 @@ export const defineEval = (
     console.table(summary)
     mkdirSync(RESULTS_DIR, { recursive: true })
     writeFileSync(
-      join(RESULTS_DIR, `${suite}.json`),
-      `${JSON.stringify({ summary, results }, null, 2)}\n`
+      file,
+      `${JSON.stringify({ summary, results: merged }, null, 2)}\n`
     )
   })
 }

@@ -18,6 +18,8 @@
   "scripts": {
     "eval": "vitest run",
     "eval:watch": "vitest --ui --open",
+    "report": "tsx report.ts",
+    "test": "vitest run --config vitest.unit.config.ts",
     "typecheck": "tsc --noEmit"
   }
 }

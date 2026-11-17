@@ -88,7 +88,7 @@ To compare with OpenAI, set `OPENAI_API_KEY` and add e.g. `openai:<model>` to `A
 | `opencode`                           | Your coding agent with the workshop key and models                        |
 | `inspector`                          | MCP Inspector against the running MCP server (try a tool without the LLM) |
 | `typecheck`, `lint`, `test`          | Code checks                                                               |
-| `eval`, `eval-ui`                    | Run the evals (`eval-ui` opens Vitest UI in the browser)                  |
+| `eval`, `eval-ui`, `eval-report`     | Run the evals (`eval-ui`: Vitest UI), write `evals/results/REPORT.md`     |
 | `record-fixtures`                    | Record and anonymise fixtures from the live backend                       |
 | `gql-gen`                            | Generate types for `apps/mcp/src/quivr/queries/*.graphql`                 |
 
@@ -108,7 +108,7 @@ Everything stays on your laptop:
 - **tools**: the expected tools were called (deterministic)
 - **judge**: an LLM compares the answer with the expected answer (`JUDGE_MODEL`)
 
-A case fails when a deterministic score is below 1. The judge score is reported, not enforced. Results per model are written to `evals/results/`. Expected facts are computed from the fixtures, so the cases stay valid when fixtures are re-recorded.
+A case fails when a deterministic score is below 1. The judge score is reported, not enforced. Results per model (scores, latency, tool calls, tokens) are written to `evals/results/`, merged by model. `just eval-report` turns them into a Markdown report, see [docs/eval-report.md](docs/eval-report.md). Expected facts are computed from the fixtures, so the cases stay valid when fixtures are re-recorded.
 
 **Baseline** (fixtures recorded on beta on 2026-11-16, 8 cases per model):
 
