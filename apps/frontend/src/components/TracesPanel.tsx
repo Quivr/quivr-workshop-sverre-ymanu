@@ -61,13 +61,11 @@ export function TracesPanel() {
       {traces.map(trace => (
         <details
           key={trace.id}
-          className="rounded-md bg-white shadow-sm"
+          className="bg-surface rounded-md shadow-sm"
         >
           <summary className="cursor-pointer px-3 py-2 text-sm">
             <span className="font-bold">{lastQuestion(trace)}</span>
-            <span
-              className={trace.error ? 'text-danger' : 'text-sidenav-secondary'}
-            >
+            <span className={trace.error ? 'text-danger' : 'text-muted'}>
               {' '}
               · {new Date(trace.startedAt).toLocaleTimeString()} · {trace.model}{' '}
               · {trace.toolCalls.length} tools · {trace.durationMs} ms

@@ -25,7 +25,7 @@ export function Composer({ isDisabled, onSend }: Props) {
         value={text}
         onChange={event => setText(event.target.value)}
         placeholder="Ask about your schedule, menus, libraries…"
-        className="border-schedule-border-grey focus:border-sidenav-blue flex-1 rounded-md border bg-white px-3 py-2 outline-none"
+        className="border-schedule-border-grey focus:border-heading bg-surface flex-1 rounded-md border px-3 py-2 outline-none"
         autoFocus
       />
       <button
