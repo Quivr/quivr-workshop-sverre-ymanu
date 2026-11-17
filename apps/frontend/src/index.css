@@ -68,6 +68,78 @@
   --color-link: #74b3f5;
 }
 
+/* Drunk mode: a joke theme that builds on the dark palette. useTheme.ts sets
+   both `dark` and `drunk` on <html>, so `.dark` above applies first and this
+   block only re-tints the tokens (all text stays AA on its background). */
+.drunk {
+  --color-schedule-bg-grey: #1d1226;
+  --color-schedule-border-grey: #5a3a6b;
+  --color-cardbg: #2e1c3a;
+  --color-main-text: #ecdcf2;
+  --color-surface: #2a1836;
+  --color-heading: #ffb3e1;
+  --color-muted: #c9a9d6;
+  --color-danger-text: #ff9a8d;
+  --color-link: #8ec5ff;
+}
+
+.drunk body {
+  background-image:
+    radial-gradient(circle at 15% 10%, rgb(255 80 170 / 0.14), transparent 45%),
+    radial-gradient(circle at 85% 90%, rgb(255 190 60 / 0.12), transparent 45%);
+  background-attachment: fixed;
+}
+
+/* Only chat messages sway (never the composer or inputs); the angle stays under 1deg so text stays crisp */
+@keyframes drunk-sway {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(-0.6deg);
+  }
+  50% {
+    transform: translate(3px, 1px) rotate(0.6deg);
+  }
+}
+
+@keyframes drunk-hic {
+  0%,
+  80%,
+  100% {
+    opacity: 0;
+    transform: translateY(4px) scale(0.8);
+  }
+  86%,
+  94% {
+    opacity: 1;
+    transform: translateY(-3px) scale(1.15);
+  }
+}
+
+.drunk .drunk-sway {
+  animation: drunk-sway 3.2s ease-in-out infinite;
+}
+
+.drunk .drunk-sway:nth-child(even) {
+  animation-duration: 4.1s;
+  animation-direction: reverse;
+}
+
+.drunk .drunk-hic {
+  display: inline-block;
+  animation: drunk-hic 7s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drunk .drunk-sway,
+  .drunk .drunk-hic {
+    animation: none;
+  }
+
+  .drunk .drunk-hic {
+    opacity: 1;
+  }
+}
+
 body {
   @apply bg-schedule-bg-grey text-main-text font-sans;
 }

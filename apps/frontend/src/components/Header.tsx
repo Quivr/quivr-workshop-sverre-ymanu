@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import type { Theme } from '../useTheme'
+import { THEME_LABEL, nextTheme, type Theme } from '../theme'
 
 type Props = {
   models: string[]
@@ -51,6 +51,14 @@ export function Header({
       <h1 className="font-title text-main mr-auto text-3xl tracking-wide">
         Ask Quivr
       </h1>
+      {theme === 'drunk' && (
+        <span
+          aria-hidden="true"
+          className="drunk-hic -ml-1 text-sm text-white italic"
+        >
+          hic!
+        </span>
+      )}
       <select
         value={model}
         onChange={event => onModelChange(event.target.value)}
@@ -98,11 +106,11 @@ export function Header({
         type="button"
         onClick={onToggleTheme}
         className={buttonClass}
-        aria-label={
-          theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
-        }
+        aria-label={`Theme: ${THEME_LABEL[theme].name.toLowerCase()}. Switch to ${THEME_LABEL[nextTheme(theme)].name.toLowerCase()} mode`}
       >
-        {theme === 'dark' ? '☀️' : '🌙'}
+        <span aria-hidden="true">
+          {THEME_LABEL[theme].icon} {THEME_LABEL[theme].name}
+        </span>
       </button>
     </header>
   )

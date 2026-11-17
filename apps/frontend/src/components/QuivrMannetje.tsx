@@ -22,7 +22,7 @@ const STEPS = [
   },
   {
     title: 'The header',
-    text: 'In the header you can pick a model, open Traces to see recent agent runs, start a New chat, and switch between dark and light mode.',
+    text: 'In the header you can pick a model, open Traces to see recent agent runs, start a New chat, and cycle through the light, dark and (silly) drunk themes.',
   },
   {
     title: 'Give it a try',

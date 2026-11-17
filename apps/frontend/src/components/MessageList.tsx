@@ -29,7 +29,7 @@ export function MessageList({ messages, durations, isRunning }: Props) {
             <div
               key={message.id}
               // dark-mode-ok: dark text on the brand yellow bg-main (6.67:1) in both themes
-              className="bg-main text-sidenav-blue ml-auto max-w-[80%] rounded-lg px-3 py-2 whitespace-pre-wrap"
+              className="drunk-sway bg-main text-sidenav-blue ml-auto max-w-[80%] rounded-lg px-3 py-2 whitespace-pre-wrap"
             >
               {textOf(message.content)}
             </div>
@@ -40,7 +40,7 @@ export function MessageList({ messages, durations, isRunning }: Props) {
         return (
           <div
             key={message.id}
-            className="max-w-[90%] space-y-2"
+            className="drunk-sway max-w-[90%] space-y-2"
           >
             {message.toolCalls?.map(call => (
               <ToolCard
