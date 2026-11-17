@@ -81,6 +81,40 @@ export const onlyUsedTools = (
   }
 }
 
+/** Deterministic: none of the forbidden tools was called. */
+export const avoidedTools = (result: AgentResult, tools: string[]): Score => {
+  const used = tools.filter(tool =>
+    result.toolCalls.some(call => call.toolName === tool)
+  )
+  return {
+    name: 'forbidden tools',
+    score: used.length ? 0 : 1,
+    reason: used.length
+      ? `called forbidden: ${used.join(', ')}`
+      : 'no forbidden tools called',
+  }
+}
+
+/** Deterministic: none of the patterns appears in the answer. */
+export const avoidsText = (result: AgentResult, patterns: RegExp[]): Score => {
+  const text = normalise(result.text)
+  const found = patterns.filter(pattern => {
+    const match = pattern.exec(text)
+    if (!match) return false
+    // "nothing has been sent yet" must not count as a claim that it was sent
+    return !/\b(no|not|nothing|never|n't)\W+(\w+\W+){0,2}$/.test(
+      text.slice(0, match.index)
+    )
+  })
+  return {
+    name: 'avoids',
+    score: found.length ? 0 : 1,
+    reason: found.length
+      ? `answer matches: ${found.join(', ')}`
+      : 'no forbidden text',
+  }
+}
+
 const verdictSchema = z.object({
   score: z.number().min(0).max(1).describe('1 = fully correct, 0 = wrong'),
   reason: z.string().describe('One short sentence'),

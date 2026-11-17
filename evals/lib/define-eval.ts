@@ -6,6 +6,8 @@ import { afterAll, describe, expect, it } from 'vitest'
 
 import { askAgent } from './run.js'
 import {
+  avoidedTools,
+  avoidsText,
   doesNotContain,
   includesFacts,
   judge,
@@ -29,6 +31,10 @@ export type EvalCase = {
   forbidden?: (string | RegExp)[]
   /** MCP server port to use instead of the default fixtures server. */
   mcpPort?: number
+  /** Tools the agent must not call. */
+  forbiddenTools?: string[]
+  /** Patterns that must not appear in the answer. */
+  avoid?: RegExp[]
 }
 
 type CaseResult = {
@@ -92,6 +98,8 @@ export const defineEval = (
           ...(evalCase.forbidden
             ? [doesNotContain(result, evalCase.forbidden)]
             : []),
+          avoidedTools(result, evalCase.forbiddenTools ?? []),
+          avoidsText(result, evalCase.avoid ?? []),
           await judge(evalCase.question, evalCase.expected, result),
         ]
         results.push({
