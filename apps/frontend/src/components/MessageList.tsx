@@ -1,6 +1,7 @@
 import type { Message } from '@ag-ui/core'
 
 import { ToolCard } from '../cards/ToolCard'
+import { Markdown } from './Markdown'
 
 type Props = {
   messages: Message[]
@@ -50,8 +51,8 @@ export function MessageList({ messages, durations, isRunning }: Props) {
               />
             ))}
             {message.content && (
-              <div className="bg-surface rounded-lg px-3 py-2 whitespace-pre-wrap shadow-sm">
-                {message.content}
+              <div className="bg-surface rounded-lg px-3 py-2 shadow-sm">
+                <Markdown>{message.content}</Markdown>
               </div>
             )}
           </div>
