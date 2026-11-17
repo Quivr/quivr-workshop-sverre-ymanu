@@ -8,6 +8,7 @@ import { getMySchedule } from './get-my-schedule.js'
 import { findCommonFreeSlots } from './find-common-free-slots.js'
 import { getFriends } from './get-friends.js'
 import { getNews } from './get-news.js'
+import { getStudentBars } from './get-student-bars.js'
 
 const fakeQuivr = (overrides: Partial<QuivrClient>) =>
   overrides as unknown as QuivrClient
@@ -451,5 +452,81 @@ describe('get_news', () => {
     expect(await getNews.run({}, newsQuivr(null).quivr)).toMatchObject({
       articles: [],
     })
+  })
+})
+
+describe('get_student_bars', () => {
+  const bar = (
+    id: string,
+    name: string,
+    busyness: string,
+    description = ''
+  ) => ({
+    id,
+    name,
+    description,
+    fakbarData: { busyness },
+  })
+  const open = [bar('1', 'Bar A', 'GREEN', ' Cheap beer. ')]
+  const all = [...open, bar('2', 'Bar B', 'CLOSED')]
+  const fakeBars = (calls: boolean[] = []) =>
+    fakeQuivr({
+      getStudentBars: async (onlyShowOpen: boolean) => {
+        calls.push(onlyShowOpen)
+        return { fakbars: onlyShowOpen ? open : all } as never
+      },
+    })
+
+  it('returns only the open bars by default', async () => {
+    const calls: boolean[] = []
+    const result = await getStudentBars.run({}, fakeBars(calls))
+
+    expect(calls).toEqual([true])
+    expect(result).toMatchObject({
+      bars: [
+        {
+          id: '1',
+          name: 'Bar A',
+          open: true,
+          busyness: 'quiet',
+          description: 'Cheap beer.',
+        },
+      ],
+    })
+  })
+
+  it('flags closed bars when onlyOpen is false', async () => {
+    const result = await getStudentBars.run({ onlyOpen: false }, fakeBars())
+
+    expect(result).toMatchObject({
+      bars: [
+        { name: 'Bar A', open: true },
+        { name: 'Bar B', open: false, busyness: undefined },
+      ],
+    })
+  })
+
+  it('returns an empty list when no bar is open', async () => {
+    const quivr = fakeQuivr({
+      getStudentBars: async () => ({ fakbars: [] }) as never,
+    })
+
+    const result = await getStudentBars.run({}, quivr)
+
+    expect(result).toMatchObject({ bars: [] })
+  })
+
+  it('shortens long descriptions', async () => {
+    const quivr = fakeQuivr({
+      getStudentBars: async () =>
+        ({ fakbars: [bar('1', 'Bar A', 'RED', 'x'.repeat(500))] }) as never,
+    })
+
+    const { bars } = (await getStudentBars.run({}, quivr)) as {
+      bars: { description: string; busyness: string }[]
+    }
+
+    expect(bars[0]?.description).toHaveLength(201)
+    expect(bars[0]?.busyness).toBe('very busy')
   })
 })

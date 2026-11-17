@@ -1,0 +1,10 @@
+query Fakbars($onlyShowOpen: Boolean) {
+  fakbars(onlyShowOpen: $onlyShowOpen) {
+    id
+    name
+    description
+    fakbarData {
+      busyness
+    }
+  }
+}

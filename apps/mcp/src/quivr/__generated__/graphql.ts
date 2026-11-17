@@ -16,6 +16,12 @@ export type AllergenKindEnum =
   | 'SOY'
   | 'SULFITE';
 
+export type BusynessLevelEnum =
+  | 'CLOSED'
+  | 'GREEN'
+  | 'RED'
+  | 'YELLOW';
+
 export type MealCategoryEnum =
   | 'BREAKFAST'
   | 'DESSERT'
@@ -31,6 +37,13 @@ export type TimeRangeInput = {
   endTime: string;
   startTime: string;
 };
+
+export type FakbarsQueryVariables = Exact<{
+  onlyShowOpen?: boolean | null | undefined;
+}>;
+
+
+export type FakbarsQuery = { fakbars: Array<{ id: string, name: string, description: string, fakbarData: { busyness: BusynessLevelEnum } | null }> };
 
 export type FriendListQueryVariables = Exact<{ [key: string]: never; }>;
 

@@ -42,6 +42,8 @@ const { newsArticlesTopics } = await quivr.getNewsTopics()
 for (const topic of [undefined, ...newsArticlesTopics]) {
   await quivr.getNews(NEWS_FETCH_COUNT, topic)
 }
+await quivr.getStudentBars(true)
+await quivr.getStudentBars(false)
 for (const date of dates) {
   await quivr.getMySchedule(date)
   await Promise.all(friendList.map(f => quivr.getFriendSchedules([f.id], date)))

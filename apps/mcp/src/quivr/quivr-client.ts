@@ -12,6 +12,7 @@ import {
 import type {
   FriendListQuery,
   FriendSchedulesQuery,
+  FakbarsQuery,
   LibrariesQuery,
   MenuQuery,
   MyScheduleQuery,
@@ -80,6 +81,10 @@ export class QuivrClient {
 
   getNewsTopics(): Promise<NewsTopicsQuery> {
     return this.request('NewsTopics', {})
+  }
+
+  getStudentBars(onlyShowOpen: boolean): Promise<FakbarsQuery> {
+    return this.request('Fakbars', { onlyShowOpen })
   }
 
   async request<T>(operationName: string, variables: object): Promise<T> {
