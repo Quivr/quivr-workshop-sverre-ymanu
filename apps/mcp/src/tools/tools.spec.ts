@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import type { QuivrClient } from '../quivr/quivr-client.js'
+import { QuivrClient, type QuivrClientOptions } from '../quivr/quivr-client.js'
 import { draftInvite } from './draft-invite.js'
 import { findCommonFreeSlots } from './find-common-free-slots.js'
 import { getFriends } from './get-friends.js'
@@ -8,6 +8,7 @@ import { findDish } from './find-dish.js'
 import { getLibraryOccupancy } from './get-library-occupancy.js'
 import { getMenu } from './get-menu.js'
 import { getMySchedule } from './get-my-schedule.js'
+import { sendInvite } from './send-invite.js'
 
 const fakeQuivr = (overrides: Partial<QuivrClient>) =>
   overrides as unknown as QuivrClient
@@ -412,5 +413,151 @@ describe('draft_invite', () => {
     await expect(
       draftInvite.run({ ...input, end: input.start }, quivr)
     ).rejects.toThrow(/start must be before end/)
+  })
+})
+
+describe('send_invite', () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  const input = {
+    friendIds: ['2', '1'],
+    title: 'Lasagna lunch',
+    start: '2026-11-17T11:30:00Z',
+    end: '2026-11-17T12:30:00Z',
+    place: 'Alma 1',
+    message: 'Lasagna?',
+    confirmed: true as const,
+  }
+  const friendList = [
+    { id: '1', firstName: 'Alex', lastName: 'Example' },
+    { id: '2', firstName: 'Sam', lastName: 'Sample' },
+  ]
+
+  const writableFake = (calls: [string, unknown[]][], failInvites = false) => {
+    const record =
+      <T>(name: string, result: T) =>
+      (...args: unknown[]) => {
+        calls.push([name, args])
+        return Promise.resolve(result)
+      }
+    return fakeQuivr({
+      assertCanWrite: (name: string) =>
+        void calls.push(['assertCanWrite', [name]]),
+      getFriends: record('getFriends', { friendList }) as never,
+      getEventSchedules: record('getEventSchedules', {
+        schedules: [{ id: '77', title: 'My events' }],
+      }) as never,
+      createEvent: record('createEvent', {
+        createEvent: [{ id: '500' }],
+      }) as never,
+      createEventInvites: (...args: unknown[]) => {
+        calls.push(['createEventInvites', args])
+        return failInvites
+          ? Promise.reject(new Error('backend down'))
+          : Promise.resolve({ createEventInvites: [] })
+      },
+    } as unknown as Partial<QuivrClient>)
+  }
+
+  const realClient = (options: Partial<QuivrClientOptions>) =>
+    new QuivrClient({
+      mode: 'live',
+      readOnly: true,
+      baseUrl: 'https://quivr.test',
+      credentials: () => ({ authorization: 'Bearer t' }),
+      ...options,
+    })
+
+  it('creates the event and invites the friends once confirmed', async () => {
+    const calls: [string, unknown[]][] = []
+
+    const result = await sendInvite.run(input, writableFake(calls))
+
+    expect(result).toEqual({
+      status: 'sent',
+      event: {
+        id: '500',
+        title: 'Lasagna lunch',
+        place: 'Alma 1',
+        start: '2026-11-17T12:30:00+01:00',
+        end: '2026-11-17T13:30:00+01:00',
+      },
+      invited: ['Sam', 'Alex'],
+    })
+    expect(calls.map(([name]) => name)).toEqual([
+      'assertCanWrite',
+      'getFriends',
+      'getEventSchedules',
+      'createEvent',
+      'createEventInvites',
+    ])
+    expect(calls.find(([name]) => name === 'createEvent')?.[1]).toEqual([
+      {
+        scheduleId: '77',
+        title: 'Lasagna lunch',
+        startTime: '2026-11-17T12:30:00+01:00',
+        endTime: '2026-11-17T13:30:00+01:00',
+        notes: 'Lasagna?',
+        locations: [{ name: 'Alma 1' }],
+        private: true,
+      },
+    ])
+    expect(calls.find(([name]) => name === 'createEventInvites')?.[1]).toEqual([
+      '500',
+      ['2', '1'],
+    ])
+  })
+
+  it('does nothing without the confirmation', async () => {
+    const calls: [string, unknown[]][] = []
+
+    await expect(
+      sendInvite.run(
+        { ...input, confirmed: false } as never,
+        writableFake(calls)
+      )
+    ).rejects.toThrow(/not confirmed/)
+    expect(calls).toEqual([])
+  })
+
+  it('fails with the read-only message and sends nothing', async () => {
+    const fetch = vi.spyOn(globalThis, 'fetch')
+
+    await expect(sendInvite.run(input, realClient({}))).rejects.toThrow(
+      /QUIVR_READ_ONLY=true/
+    )
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
+  it('reports "not sent" in fixtures mode and never touches the network', async () => {
+    const fetch = vi.spyOn(globalThis, 'fetch')
+
+    const result = await sendInvite.run(
+      input,
+      realClient({ mode: 'fixtures', readOnly: false })
+    )
+
+    expect(result).toMatchObject({
+      status: 'not_sent',
+      reason: 'fixtures mode',
+    })
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
+  it('refuses unknown friends before creating anything', async () => {
+    const calls: [string, unknown[]][] = []
+
+    await expect(
+      sendInvite.run({ ...input, friendIds: ['99'] }, writableFake(calls))
+    ).rejects.toThrow(/Unknown friend id.*99/)
+    expect(calls.map(([name]) => name)).not.toContain('createEvent')
+  })
+
+  it('says so when the event exists but the invitations failed', async () => {
+    const calls: [string, unknown[]][] = []
+
+    await expect(
+      sendInvite.run(input, writableFake(calls, true))
+    ).rejects.toThrow(/event was created \(id 500\).*NOT sent.*backend down/)
   })
 })

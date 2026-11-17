@@ -1,7 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { credentialsFrom } from '../config.js'
-import { QuivrClient, type QuivrClientOptions } from './quivr-client.js'
+import {
+  FixturesModeError,
+  QuivrClient,
+  type QuivrClientOptions,
+} from './quivr-client.js'
 
 const QUERIES = {
   CreateEvent: 'mutation CreateEvent { createEvent { id } }',
@@ -54,6 +58,21 @@ describe('QuivrClient', () => {
 
     expect(data).toEqual({ createEvent: { id: '1' } })
     expect(fetch).toHaveBeenCalledOnce()
+  })
+
+  it('never sends mutations in fixtures mode, even when read-only is off', async () => {
+    const fetch = respondWith({})
+
+    await expect(
+      client({ mode: 'fixtures', readOnly: false }).request('CreateEvent', {})
+    ).rejects.toThrow(FixturesModeError)
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
+  it('keeps the read-only message first when both apply', () => {
+    expect(() =>
+      client({ mode: 'fixtures' }).assertCanWrite('CreateEvent')
+    ).toThrow(/QUIVR_READ_ONLY=true/)
   })
 
   it('sends the auth headers with queries', async () => {

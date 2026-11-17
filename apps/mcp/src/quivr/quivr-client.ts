@@ -10,6 +10,10 @@ import {
   type QuivrCredentials,
 } from '../config.js'
 import type {
+  CreateEventInvitesMutation,
+  CreateEventMutation,
+  EventInput,
+  EventSchedulesQuery,
   FriendListQuery,
   FriendSchedulesQuery,
   LibrariesQuery,
@@ -33,6 +37,16 @@ export type QuivrClientOptions = Pick<
 type GraphQLResponse<T> = {
   data?: T
   errors?: { message: string }[]
+}
+
+/** A mutation was asked for while running on recorded fixtures: nothing is sent. */
+export class FixturesModeError extends Error {
+  constructor(operationName: string) {
+    super(
+      `${operationName} is a mutation and QUIVR_MODE=fixtures: nothing was sent. Use QUIVR_MODE=live (and QUIVR_READ_ONLY=false) to really write.`
+    )
+    this.name = 'FixturesModeError'
+  }
 }
 
 /**
@@ -72,6 +86,33 @@ export class QuivrClient {
     })
   }
 
+  getEventSchedules(): Promise<EventSchedulesQuery> {
+    return this.request('EventSchedules', {})
+  }
+
+  /** Mutation: only works with QUIVR_READ_ONLY=false in live mode. */
+  createEvent(eventInput: EventInput): Promise<CreateEventMutation> {
+    return this.request('CreateEvent', { eventInput })
+  }
+
+  /** Mutation: notifies the recipients. Only works with QUIVR_READ_ONLY=false in live mode. */
+  createEventInvites(
+    eventId: string,
+    recipientIds: string[]
+  ): Promise<CreateEventInvitesMutation> {
+    return this.request('CreateEventInvites', {
+      eventInvitesInput: { eventId, recipientIds },
+    })
+  }
+
+  /**
+   * Call before doing any work for a write, so it fails before anything is
+   * read or sent. Same checks `request` applies to every mutation.
+   */
+  assertCanWrite(operationName: string) {
+    this.assertMutationAllowed(operationName)
+  }
+
   async request<T>(operationName: string, variables: object): Promise<T> {
     const query = readFileSync(
       join(QUERIES_DIR, `${operationName}.graphql`),
@@ -97,10 +138,19 @@ export class QuivrClient {
     if (operation.operation === 'subscription') {
       throw new Error(`${operationName}: subscriptions are not supported`)
     }
-    if (operation.operation === 'mutation' && this.options.readOnly) {
+    if (operation.operation === 'mutation') {
+      this.assertMutationAllowed(operationName)
+    }
+  }
+
+  private assertMutationAllowed(operationName: string) {
+    if (this.options.readOnly) {
       throw new Error(
         `${operationName} is a mutation and QUIVR_READ_ONLY=true. Set QUIVR_READ_ONLY=false in .env to allow writes.`
       )
+    }
+    if (this.options.mode === 'fixtures') {
+      throw new FixturesModeError(operationName)
     }
   }
 

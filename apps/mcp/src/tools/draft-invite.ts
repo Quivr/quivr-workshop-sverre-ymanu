@@ -1,24 +1,14 @@
 import { z } from 'zod'
 
 import { defineTool } from './define-tool.js'
-import { formatBrussels } from './free-slots.js'
+import { parseInviteTimes, resolveFriends } from './invite-input.js'
 
 const MAX_FRIENDS = 10
-
-const parseTime = (label: string, value: string): number => {
-  const time = Date.parse(value)
-  if (Number.isNaN(time)) {
-    throw new Error(
-      `${label} must be an ISO 8601 date and time, e.g. 2026-11-17T14:00:00+01:00`
-    )
-  }
-  return time
-}
 
 export const draftInvite = defineTool({
   name: 'draft_invite',
   description:
-    'Prepare a DRAFT invitation to a meetup with friends, for example after find_common_free_slots has found a time everyone is free and (optionally) find_dish has found where a dish is served. Call get_friends first to get the friend ids. It only builds the draft and shows it to the student: NOTHING is created or sent to anyone, and no friend is notified. After calling it, show the draft (who, when, where, message) and ask the student whether it is OK or what to change. Never say or imply that an invitation was sent.',
+    'Prepare a DRAFT invitation to a meetup with friends, for example after find_common_free_slots has found a time everyone is free and (optionally) find_dish has found where a dish is served. Call get_friends first to get the friend ids. It only builds the draft and shows it to the student: NOTHING is created or sent to anyone, and no friend is notified. After calling it, show the draft (who, when, where, message) and ask the student whether it is OK or what to change. Never say or imply that an invitation was sent. Only if the student then explicitly confirms the draft can send_invite really send it.',
   inputSchema: {
     friendIds: z
       .array(z.string())
@@ -45,30 +35,14 @@ export const draftInvite = defineTool({
       ),
   },
   run: async ({ friendIds, start, end, place, message }, quivr) => {
-    const startTime = parseTime('start', start)
-    const endTime = parseTime('end', end)
-    if (startTime >= endTime) {
-      throw new Error('start must be before end.')
-    }
-
-    const ids = [...new Set(friendIds)]
-    const { friendList } = await quivr.getFriends()
-    const unknown = ids.filter(id => !friendList.some(f => f.id === id))
-    if (unknown.length > 0) {
-      throw new Error(
-        `Unknown friend id(s): ${unknown.join(', ')}. Use get_friends to find the ids.`
-      )
-    }
+    const times = parseInviteTimes(start, end)
+    const friends = await resolveFriends(friendIds, quivr)
 
     return {
       status: 'draft_not_sent',
       draft: {
-        friends: ids.map(id => ({
-          id,
-          firstName: friendList.find(f => f.id === id)?.firstName ?? id,
-        })),
-        start: formatBrussels(startTime),
-        end: formatBrussels(endTime),
+        friends,
+        ...times,
         place,
         message,
       },

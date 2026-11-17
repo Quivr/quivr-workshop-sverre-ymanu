@@ -1,0 +1,6 @@
+query EventSchedules {
+  schedules(types: [EVENT_SCHEDULE]) {
+    id
+    title
+  }
+}
