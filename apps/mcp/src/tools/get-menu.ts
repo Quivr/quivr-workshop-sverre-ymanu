@@ -5,7 +5,7 @@ import { dateSchema, defineTool } from './define-tool.js'
 export const getMenu = defineTool({
   name: 'get_menu',
   description:
-    'Get the menu of one student restaurant on one day: opening hours and dishes with prices (EUR, student price first), vegetarian/vegan flags (vegan dishes count as vegetarian) and allergens. Get the restaurant id from list_restaurants first.',
+    'Get the menu of one student restaurant on one day: opening hours and dishes with prices (EUR, student price first), vegetarian/vegan flags (vegan dishes count as vegetarian) and allergens. The main hot meals have category WARM_BUFFET; the rest is soup, salads, sandwiches, snacks, desserts, drinks and breakfast. Get the restaurant id from list_restaurants first.',
   inputSchema: {
     restaurantId: z.string().describe('Restaurant id from list_restaurants'),
     date: dateSchema.describe('Day, YYYY-MM-DD'),
