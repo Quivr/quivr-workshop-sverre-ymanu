@@ -9,7 +9,9 @@ import { Composer } from './components/Composer'
 import { DiceRoller } from './components/DiceRoller'
 import { Header } from './components/Header'
 import { MessageList } from './components/MessageList'
+import { PopupAds } from './components/PopupAds'
 import { QuivrMannetje } from './components/QuivrMannetje'
+import { SideVideo } from './components/SideVideo'
 import { TracesPanel } from './components/TracesPanel'
 import { Welcome } from './components/Welcome'
 import { useAgentChat } from './useAgentChat'
@@ -175,6 +177,8 @@ export function App() {
         onClose={check.close}
       />
       <QuivrMannetje model={model} />
+      <SideVideo />
+      <PopupAds />
     </div>
   )
 }
