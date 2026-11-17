@@ -8,7 +8,7 @@ export function TraceTimeline({ trace }: { trace: Trace }) {
 
   return (
     <div className="space-y-1 text-xs">
-      <div className="text-sidenav-secondary flex justify-between">
+      <div className="text-muted flex justify-between">
         <span className="font-bold">Timeline</span>
         <span>{totalMs} ms</span>
       </div>
@@ -27,7 +27,7 @@ export function TraceTimeline({ trace }: { trace: Trace }) {
                 row.failed
                   ? 'bg-danger'
                   : row.kind === 'tool'
-                    ? 'bg-green-status'
+                    ? 'bg-ok'
                     : 'bg-blue-pretty'
               }`}
               style={{ left: `${row.leftPct}%`, width: `${row.widthPct}%` }}
@@ -40,7 +40,7 @@ export function TraceTimeline({ trace }: { trace: Trace }) {
         </div>
       ))}
       {!trace.steps?.length && (
-        <p className="text-sidenav-secondary">
+        <p className="text-muted">
           This run was recorded without LLM step timings.
         </p>
       )}

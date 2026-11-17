@@ -58,11 +58,11 @@ export function NewsCard({ result }: CardProps) {
                   </span>
                 )}
                 {meta && (
-                  <span className="shrink-0 text-xs opacity-70">{meta}</span>
+                  <span className="text-muted shrink-0 text-xs">{meta}</span>
                 )}
               </div>
               {article.summary && (
-                <p className="opacity-80">{article.summary}</p>
+                <p className="text-muted">{article.summary}</p>
               )}
             </li>
           )

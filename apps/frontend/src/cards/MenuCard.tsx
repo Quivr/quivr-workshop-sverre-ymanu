@@ -26,7 +26,7 @@ function DietBadge({ dish }: { dish: Dish }) {
   }
   if (dish.vegetarian) {
     return (
-      <span className="bg-vegetarian rounded px-1.5 text-xs text-white">
+      <span className="bg-ok-tint text-ok-text rounded px-1.5 text-xs">
         veggie
       </span>
     )

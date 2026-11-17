@@ -19,7 +19,7 @@ export function ToolCallCard({
     <details className="border-schedule-border-grey bg-surface rounded-md border text-xs">
       <summary className="cursor-pointer px-3 py-2">
         <span className="font-bold">🔧 {toolName}</span>
-        <span className={error ? 'text-danger' : 'text-muted'}>
+        <span className={error ? 'text-danger-text' : 'text-muted'}>
           {' '}
           {status}
           {duration}

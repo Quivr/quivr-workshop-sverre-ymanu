@@ -27,7 +27,7 @@ export function Composer({ isDisabled, isRunning, onSend, onStop }: Props) {
         value={text}
         onChange={event => setText(event.target.value)}
         placeholder="Ask about your schedule, menus, libraries…"
-        className="border-schedule-border-grey focus:border-heading bg-surface flex-1 rounded-md border px-3 py-2 outline-none"
+        className="border-schedule-border-grey focus:border-heading bg-surface placeholder:text-muted flex-1 rounded-md border px-3 py-2 outline-none"
         autoFocus
       />
       {isRunning ? (
@@ -42,6 +42,7 @@ export function Composer({ isDisabled, isRunning, onSend, onStop }: Props) {
         <button
           type="submit"
           disabled={isDisabled}
+          // dark-mode-ok: dark text on the brand yellow bg-main (6.67:1) in both themes
           className="bg-main text-sidenav-blue rounded-md px-4 py-2 font-bold disabled:opacity-50"
         >
           Send

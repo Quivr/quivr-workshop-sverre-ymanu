@@ -19,6 +19,14 @@
   --color-surface: #fff;
   --color-heading: #34495e;
   --color-muted: #566e86;
+  /* Status colours. Text tokens are AA on surface and page background;
+     ok/warn are bar fills (3:1 against the grey bar track). */
+  --color-danger-text: #b83224;
+  --color-ok-text: #166534;
+  --color-ok-tint: #dcfce7;
+  --color-ok: #0e8a6e;
+  --color-warn: #b87400;
+  --color-link: #1565c0;
 
   --font-title: 'bebas_neueregular', sans-serif;
   --font-sans:
@@ -52,6 +60,12 @@
   --color-surface: #1e262e;
   --color-heading: #ffd750;
   --color-muted: #9fb3c8;
+  --color-danger-text: #ff8a7d;
+  --color-ok-text: #86efac;
+  --color-ok-tint: #14532d;
+  --color-ok: #1abc9c;
+  --color-warn: #ffd750;
+  --color-link: #74b3f5;
 }
 
 body {

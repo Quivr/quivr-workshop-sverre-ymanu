@@ -13,7 +13,7 @@ type Bars = { bars?: Bar[] }
 function OpenBadge({ open }: { open: boolean }) {
   return (
     <span
-      className={`${open ? 'bg-green-status' : 'bg-sidenav-secondary'} shrink-0 rounded px-1.5 text-xs text-white`}
+      className={`${open ? 'bg-ok-tint text-ok-text' : 'bg-sidenav-secondary text-white'} shrink-0 rounded px-1.5 text-xs`}
     >
       {open ? 'open' : 'closed'}
     </span>
@@ -42,13 +42,13 @@ export function BarsCard({ result }: CardProps) {
               <span className="font-bold">{bar.name}</span>
               <span className="flex items-center gap-2">
                 {bar.busyness && (
-                  <span className="text-xs opacity-70">{bar.busyness}</span>
+                  <span className="text-muted text-xs">{bar.busyness}</span>
                 )}
                 <OpenBadge open={bar.open === true} />
               </span>
             </div>
             {bar.description && (
-              <p className="text-xs opacity-70">{bar.description}</p>
+              <p className="text-muted text-xs">{bar.description}</p>
             )}
           </li>
         ))}

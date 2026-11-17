@@ -42,7 +42,7 @@ export function TraceCompare({ a, b }: { a: Trace; b: Trace }) {
     value === undefined ? 'n/a' : formatCost(value).replace('~', '')
 
   return (
-    <div className="border-main space-y-3 rounded-md border-2 bg-white p-3 text-sm shadow-sm">
+    <div className="border-main bg-surface space-y-3 rounded-md border-2 p-3 text-sm shadow-sm">
       <div className="font-bold">Comparing two runs</div>
       <table className="text-xs">
         <thead>
@@ -62,8 +62,10 @@ export function TraceCompare({ a, b }: { a: Trace; b: Trace }) {
       </table>
       <div className="space-y-1 text-xs">
         <div className="font-bold">Tools called</div>
-        <p className="text-danger">Only in A: {names(diff.tools.removed)}</p>
-        <p className="text-vegan">Only in B: {names(diff.tools.added)}</p>
+        <p className="text-danger-text">
+          Only in A: {names(diff.tools.removed)}
+        </p>
+        <p className="text-ok-text">Only in B: {names(diff.tools.added)}</p>
         <p>In both: {names(diff.tools.same)}</p>
       </div>
       <div>
@@ -76,7 +78,7 @@ export function TraceCompare({ a, b }: { a: Trace; b: Trace }) {
               key={trace.id}
               className="bg-schedule-bg-grey rounded p-2"
             >
-              <div className="text-sidenav-secondary mb-1 text-xs">
+              <div className="text-muted mb-1 text-xs">
                 {index === 0 ? 'A' : 'B'} · {question(trace)}
               </div>
               <p className="text-xs whitespace-pre-wrap">

@@ -37,7 +37,7 @@ export function TracesPanel() {
   }, [])
 
   if (error)
-    return <p className="text-danger">Could not load traces: {error}</p>
+    return <p className="text-danger-text">Could not load traces: {error}</p>
   if (!traces) return <p>Loading traces…</p>
   if (traces.length === 0)
     return <p>No runs yet. Ask something in the chat first.</p>
@@ -52,7 +52,7 @@ export function TracesPanel() {
 
   return (
     <div className="space-y-2">
-      <p className="text-sidenav-secondary text-xs">
+      <p className="text-muted text-xs">
         Tick two runs to compare them. Costs are estimates from a small price
         table.
       </p>
@@ -77,7 +77,7 @@ export function TracesPanel() {
               onChange={() => toggleSelected(trace.id)}
             />
             <span className="font-bold">{lastQuestion(trace)}</span>
-            <span className={trace.error ? 'text-danger' : 'text-muted'}>
+            <span className={trace.error ? 'text-danger-text' : 'text-muted'}>
               {' '}
               · {new Date(trace.startedAt).toLocaleTimeString()} · {trace.model}{' '}
               · {trace.toolCalls.length} tools · {trace.durationMs} ms
@@ -99,7 +99,7 @@ export function TracesPanel() {
               />
             ))}
             {trace.error && (
-              <p className="text-danger text-sm">Error: {trace.error}</p>
+              <p className="text-danger-text text-sm">Error: {trace.error}</p>
             )}
             <p className="text-sm whitespace-pre-wrap">{trace.text}</p>
           </div>
