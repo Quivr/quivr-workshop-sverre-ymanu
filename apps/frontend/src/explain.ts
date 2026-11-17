@@ -16,6 +16,7 @@ export const APP_GUIDE = `Ask Quivr is a chat assistant for students on top of t
 - Header: a model picker, "Traces" (recent agent runs: questions, tool calls, timing), a copy-chat button, "New chat" and a dark/light toggle.
 - Below the title are example questions to click. At the bottom is the message box with a Send button (and Stop while the assistant is answering).
 - Answers appear as chat bubbles. When the assistant looks something up, a tool call is shown that can be expanded to see its arguments and result. Menus and schedules get their own card.
+- Typing /summon in the message box calls another little quivr-mannetje (/summon 10 calls ten). It is a command for the app: it is not sent to the assistant.
 - The assistant only knows what the Quivr tools return: schedule, restaurant menus, library occupancy and more.`
 
 const MAX_TARGET_CHARS = 400
