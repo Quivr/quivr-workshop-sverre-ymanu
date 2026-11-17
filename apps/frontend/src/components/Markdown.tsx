@@ -10,25 +10,25 @@ const components: Components = {
   ),
   h1: props => (
     <h1
-      className="font-title text-sidenav-blue mt-3 mb-2 text-2xl"
+      className="font-title text-heading mt-3 mb-2 text-2xl"
       {...props}
     />
   ),
   h2: props => (
     <h2
-      className="font-title text-sidenav-blue mt-3 mb-2 text-xl"
+      className="font-title text-heading mt-3 mb-2 text-xl"
       {...props}
     />
   ),
   h3: props => (
     <h3
-      className="text-sidenav-blue mt-3 mb-1 font-bold"
+      className="text-heading mt-3 mb-1 font-bold"
       {...props}
     />
   ),
   h4: props => (
     <h4
-      className="text-sidenav-blue mt-3 mb-1 font-bold"
+      className="text-heading mt-3 mb-1 font-bold"
       {...props}
     />
   ),
