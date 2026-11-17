@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import type { QuivrClient } from '../quivr/quivr-client.js'
+import { draftInvite } from './draft-invite.js'
 import { findCommonFreeSlots } from './find-common-free-slots.js'
 import { getFriends } from './get-friends.js'
 import { findDish } from './find-dish.js'
@@ -348,5 +349,68 @@ describe('find_dish', () => {
     )
 
     expect(result).toMatchObject({ totalMatches: 0, matches: [] })
+  })
+})
+
+describe('draft_invite', () => {
+  const getFriendsOnly = {
+    getFriends: async () =>
+      ({
+        friendList: [
+          { id: '1', firstName: 'Alex', lastName: 'Example' },
+          { id: '2', firstName: 'Sam', lastName: 'Sample' },
+        ],
+      }) as never,
+  }
+  const input = {
+    friendIds: ['2', '1', '2'],
+    start: '2026-11-17T11:30:00Z',
+    end: '2026-11-17T12:30:00Z',
+    place: 'Alma 1',
+    message: 'Lasagna?',
+  }
+
+  it('returns a draft with first names and sends nothing', async () => {
+    const calls: string[] = []
+    const quivr = fakeQuivr(
+      new Proxy(getFriendsOnly, {
+        get: (target, name: string) => {
+          calls.push(name)
+          return target[name as keyof typeof target]
+        },
+      })
+    )
+
+    const result = await draftInvite.run(input, quivr)
+
+    expect(result).toEqual({
+      status: 'draft_not_sent',
+      draft: {
+        friends: [
+          { id: '2', firstName: 'Sam' },
+          { id: '1', firstName: 'Alex' },
+        ],
+        start: '2026-11-17T12:30:00+01:00',
+        end: '2026-11-17T13:30:00+01:00',
+        place: 'Alma 1',
+        message: 'Lasagna?',
+      },
+      note: expect.stringContaining('Nothing was sent') as string,
+    })
+    expect(calls).toEqual(['getFriends'])
+    expect(JSON.stringify(result)).not.toMatch(/Example|Sample/)
+  })
+
+  it('refuses unknown friends, bad times and an end before the start', async () => {
+    const quivr = fakeQuivr(getFriendsOnly)
+    await expect(
+      draftInvite.run({ ...input, friendIds: ['99'] }, quivr)
+    ).rejects.toThrow(/Unknown friend id.*99/)
+    await expect(
+      draftInvite.run({ ...input, start: 'tomorrow' }, quivr)
+    ).rejects.toThrow(/start must be an ISO/)
+    await expect(
+      draftInvite.run({ ...input, end: input.start }, quivr)
+    ).rejects.toThrow(/start must be before end/)
   })
 })

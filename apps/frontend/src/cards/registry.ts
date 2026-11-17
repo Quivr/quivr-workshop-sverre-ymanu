@@ -2,6 +2,7 @@ import type { ComponentType } from 'react'
 
 import { FreeSlotsCard } from './FreeSlotsCard'
 import { DishSearchCard } from './DishSearchCard'
+import { InviteDraftCard } from './InviteDraftCard'
 import { MenuCard } from './MenuCard'
 import { ScheduleCard } from './ScheduleCard'
 import type { CardProps } from './types'
@@ -12,4 +13,5 @@ export const cards: Record<string, ComponentType<CardProps>> = {
   get_menu: MenuCard,
   find_common_free_slots: FreeSlotsCard,
   find_dish: DishSearchCard,
+  draft_invite: InviteDraftCard,
 }

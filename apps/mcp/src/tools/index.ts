@@ -1,4 +1,5 @@
 import type { ToolDefinition } from './define-tool.js'
+import { draftInvite } from './draft-invite.js'
 import { findCommonFreeSlots } from './find-common-free-slots.js'
 import { getFriends } from './get-friends.js'
 import { findDish } from './find-dish.js'
@@ -16,4 +17,5 @@ export const tools = [
   getFriends,
   findCommonFreeSlots,
   findDish,
+  draftInvite,
 ] as ToolDefinition[]

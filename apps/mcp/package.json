@@ -42,6 +42,7 @@
     "./quivr-client": "./src/quivr/quivr-client.ts",
     "./dates": "./src/quivr/dates.ts",
     "./find-common-free-slots": "./src/tools/find-common-free-slots.ts",
+    "./find-dish": "./src/tools/find-dish.ts",
     "./config": "./src/config.ts"
   }
 }
