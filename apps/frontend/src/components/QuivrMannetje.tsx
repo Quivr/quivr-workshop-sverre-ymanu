@@ -41,8 +41,15 @@ const COMFY_DISTANCE = 80 // he likes to stand about this far from the cursor
 const TOO_CLOSE = 45 // closer than this and he steps away (tag!)
 const LOOK_RANGE = 2.5 // how far the eyes move inside the Q, in SVG units
 const SPEAK_DELAY_MS = 80
+// The opening tour moves on by itself: reading time = base + per character
+const READ_BASE_MS = 4000
+const READ_PER_CHAR_MS = 70
+const CORNERED_DISTANCE = 20 // a flee target closer than this means he is stuck against an edge
 const IS_SPEECH_SUPPORTED =
   typeof window !== 'undefined' && 'speechSynthesis' in window
+
+const isPageVisible = () =>
+  typeof document === 'undefined' || document.visibilityState === 'visible'
 
 const readMuted = () => {
   try {
@@ -91,10 +98,23 @@ const homePoint = (element: HTMLElement | null): Point => {
   return rect ? { x: rect.left, y: rect.top } : { x: MARGIN, y: MARGIN }
 }
 
+// The upper bound never drops below MARGIN, so a tiny viewport can't flip the range
 const clampPoint = (point: Point): Point => ({
-  x: Math.min(Math.max(point.x, MARGIN), window.innerWidth - SIZE - MARGIN),
-  y: Math.min(Math.max(point.y, MARGIN), window.innerHeight - SIZE - MARGIN),
+  x: Math.min(
+    Math.max(point.x, MARGIN),
+    Math.max(MARGIN, window.innerWidth - SIZE - MARGIN)
+  ),
+  y: Math.min(
+    Math.max(point.y, MARGIN),
+    Math.max(MARGIN, window.innerHeight - SIZE - MARGIN)
+  ),
 })
+
+const randomPoint = (): Point =>
+  clampPoint({
+    x: Math.random() * window.innerWidth,
+    y: Math.random() * window.innerHeight,
+  })
 
 const placeSprite = (element: HTMLElement, point: Point) => {
   element.style.transform = `translate3d(${point.x.toFixed(1)}px, ${point.y.toFixed(1)}px, 0)`
@@ -199,6 +219,12 @@ function Mannetje({ isTalking }: { isTalking: boolean }) {
 /** Little Q-shaped guide: gives a spoken tour, then wanders the screen and plays with the cursor. */
 export function QuivrMannetje() {
   const [isOpen, setIsOpen] = useState(true)
+  // The tour that opens by itself closes by itself; one the user asked for stays
+  const [isAutoTour, setIsAutoTour] = useState(true)
+  // The auto tour only runs while the page is visible and the user is not
+  // hovering over the bubble (they are reading it)
+  const [isVisible, setIsVisible] = useState(isPageVisible)
+  const [isHovering, setIsHovering] = useState(false)
   const [step, setStep] = useState(0)
   const [isMuted, setIsMuted] = useState(readMuted)
   const [isTalking, setIsTalking] = useState(false)
@@ -231,11 +257,13 @@ export function QuivrMannetje() {
     if (bubbleRef.current?.contains(document.activeElement)) {
       helpRef.current?.focus()
     }
+    setIsHovering(false)
     setIsOpen(false)
   }, [])
 
   const open = () => {
     shouldFocusNextRef.current = true
+    setIsAutoTour(false)
     setStep(0)
     setIsOpen(true)
   }
@@ -328,14 +356,38 @@ export function QuivrMannetje() {
   }, [canSpeak, hasStarted])
 
   useEffect(() => {
+    const update = () => setIsVisible(isPageVisible())
+    document.addEventListener('visibilitychange', update)
+    return () => document.removeEventListener('visibilitychange', update)
+  }, [])
+
+  // While the tour is open he is pinned home, so an ignored tour must not hold
+  // him there forever. The opening tour therefore walks through the steps by
+  // itself, each shown long enough to read (and speak), and closes after the
+  // last one. It waits while the page is hidden or the bubble is hovered. It
+  // does not depend on the window having focus: you can watch it unfocused.
+  useEffect(() => {
+    if (!isOpen || !isAutoTour || !isVisible || isHovering) return
+    const delay =
+      READ_BASE_MS + (STEPS[step]?.text.length ?? 0) * READ_PER_CHAR_MS
+    const timer = window.setTimeout(
+      isLast ? close : () => setStep(value => value + 1),
+      delay
+    )
+    return () => window.clearTimeout(timer)
+  }, [isOpen, isAutoTour, isVisible, isHovering, step, isLast, close])
+
+  // Updated in a layout effect so the animation loop never reads a stale value
+  useLayoutEffect(() => {
     isOpenRef.current = isOpen
   }, [isOpen])
 
-  // Start at home (next to the "?" button) before the first paint
+  // Start at home (next to the "?" button) before the first paint. The point
+  // is copied into the existing object: the animation loop holds a reference.
   useLayoutEffect(() => {
     const sprite = spriteRef.current
     if (!sprite) return
-    positionRef.current = homePoint(homeRef.current)
+    Object.assign(positionRef.current, homePoint(homeRef.current))
     placeSprite(sprite, positionRef.current)
   }, [])
 
@@ -348,7 +400,7 @@ export function QuivrMannetje() {
     if (isReducedMotion) {
       // No roaming: just sit at home
       const goHome = () => {
-        positionRef.current = homePoint(homeRef.current)
+        Object.assign(positionRef.current, homePoint(homeRef.current))
         placeSprite(sprite, positionRef.current)
       }
       sprite.dataset.mode = 'idle'
@@ -407,6 +459,14 @@ export function QuivrMannetje() {
             x: position.x + awayX * 150,
             y: position.y + awayY * 150,
           })
+          // Against an edge or corner "away" is clamped onto the spot he is
+          // already on, so he would never move: run somewhere else instead
+          if (
+            Math.hypot(target.x - position.x, target.y - position.y) <
+            CORNERED_DISTANCE
+          ) {
+            target = randomPoint()
+          }
           speed = RUN_SPEED
         } else if (distance > COMFY_DISTANCE + 10) {
           // Curious: walk over, stop a little way from the cursor
@@ -421,10 +481,7 @@ export function QuivrMannetje() {
         }
       } else if (!target && now >= idleUntil) {
         // Nothing going on: wander to a random spot
-        target = clampPoint({
-          x: Math.random() * window.innerWidth,
-          y: Math.random() * window.innerHeight,
-        })
+        target = randomPoint()
       }
 
       let heading = 0
@@ -514,6 +571,8 @@ export function QuivrMannetje() {
             ref={bubbleRef}
             role="dialog"
             aria-label="quivr-mannetje tour"
+            onPointerEnter={() => setIsHovering(true)}
+            onPointerLeave={() => setIsHovering(false)}
             className="quivr-mannetje-bubble border-schedule-border-grey bg-surface text-main-text pointer-events-auto relative w-72 max-w-full rounded-xl border p-3 text-sm shadow-lg"
           >
             <div className="mb-1 flex items-center gap-2">
