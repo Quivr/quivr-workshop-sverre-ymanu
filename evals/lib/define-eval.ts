@@ -11,6 +11,7 @@ import {
   doesNotContain,
   includesFacts,
   judge,
+  maxWords,
   onlyUsedTools,
   usedTools,
   type Score,
@@ -35,6 +36,8 @@ export type EvalCase = {
   forbiddenTools?: string[]
   /** Patterns that must not appear in the answer. */
   avoid?: RegExp[]
+  /** The answer may have at most this many words. */
+  maxWords?: number
 }
 
 type CaseResult = {
@@ -100,6 +103,9 @@ export const defineEval = (
             : []),
           avoidedTools(result, evalCase.forbiddenTools ?? []),
           avoidsText(result, evalCase.avoid ?? []),
+          ...(evalCase.maxWords !== undefined
+            ? [maxWords(result, evalCase.maxWords)]
+            : []),
           await judge(evalCase.question, evalCase.expected, result),
         ]
         results.push({

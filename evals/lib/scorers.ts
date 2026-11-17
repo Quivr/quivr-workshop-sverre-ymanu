@@ -81,6 +81,16 @@ export const onlyUsedTools = (
   }
 }
 
+/** Deterministic: the answer has at most `max` words (brevity). */
+export const maxWords = (result: AgentResult, max: number): Score => {
+  const words = result.text.split(/\s+/).filter(Boolean).length
+  return {
+    name: 'length',
+    score: words <= max ? 1 : 0,
+    reason: `${words} words (max ${max})`,
+  }
+}
+
 /** An affirmative claim that the invite went out ("I sent it", "has been sent"). */
 export const CLAIMS_SENT = [
   /\b(i|i've|i have)\s+(just |already )?(sent|invited|notified)\b/,

@@ -1,0 +1,140 @@
+import { defineEval, type EvalCase } from './lib/define-eval.js'
+import {
+  findRestaurant,
+  fixtures,
+  today,
+  tomorrow,
+} from './lib/fixture-data.js'
+
+const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+const anyOf = (names: string[]) =>
+  new RegExp(names.map(name => escape(name.toLowerCase())).join('|'))
+
+const clean = (name: string) => name.trim().replace(/[.,;]+$/, '')
+
+type Dish = {
+  name: string
+  mealCategory: string | null
+  vegetarian: boolean
+  vegan: boolean
+}
+
+const menus = async (date: string) => {
+  const { restaurants } = await fixtures.listRestaurants()
+  return Promise.all(
+    restaurants.map(async restaurant => {
+      const { restaurants: menu } = await fixtures.getMenu(restaurant.id, date)
+      return {
+        name: restaurant.name,
+        dishes: (menu[0]?.dishes ?? []) as Dish[],
+      }
+    })
+  )
+}
+
+const warm = (dishes: Dish[]) =>
+  dishes.filter(dish => dish.mealCategory === 'WARM_BUFFET')
+
+const lunchCase = async (): Promise<EvalCase> => {
+  const open = (await menus(today())).filter(m => warm(m.dishes).length)
+  return {
+    name: 'broad: lunch today (summary, not every dish)',
+    question: "What's for lunch at the student restaurants today?",
+    expected: `A short summary of the warm main dishes at the open restaurants (${open.map(m => m.name).join(', ')}), for example ${warm(
+      open[0]?.dishes ?? []
+    )
+      .map(d => clean(d.name))
+      .join(
+        ', '
+      )}, without listing every sandwich, snack and drink. It may offer to show more.`,
+    facts: [anyOf(open.flatMap(m => warm(m.dishes)).map(d => clean(d.name)))],
+    tools: ['list_restaurants', 'get_menu'],
+    maxWords: 150,
+  }
+}
+
+const vegetarianTomorrowCase = async (): Promise<EvalCase> => {
+  const open = (await menus(tomorrow())).map(m => ({
+    name: m.name,
+    dishes: warm(m.dishes).filter(d => d.vegetarian || d.vegan),
+  }))
+  return {
+    name: 'broad: vegetarian tomorrow (summary)',
+    question: "What's vegetarian at the student restaurants tomorrow?",
+    expected: `A short summary of vegetarian (including vegan) warm dishes tomorrow, such as ${open
+      .flatMap(m => m.dishes)
+      .slice(0, 4)
+      .map(d => clean(d.name))
+      .join(
+        ', '
+      )}. It does not dump every vegetarian sandwich, snack and dessert and may offer to show more.`,
+    facts: [anyOf(open.flatMap(m => m.dishes).map(d => clean(d.name)))],
+    tools: ['list_restaurants', 'get_menu'],
+    maxWords: 150,
+  }
+}
+
+const leastBusyCase = async (): Promise<EvalCase> => {
+  const { libraries } = await fixtures.getLibraries()
+  const live = libraries
+    .filter(l => l.data && l.data.capacity > 0)
+    .map(l => ({
+      name: l.name,
+      ratio: l.data!.occupancy / l.data!.capacity,
+      occupancy: l.data!.occupancy,
+    }))
+    .sort((a, b) => a.ratio - b.ratio)
+  const nonEmpty = live.filter(l => l.occupancy > 0)
+  const names = [live[0], nonEmpty[0]].filter(Boolean).map(l => l!.name)
+  return {
+    name: 'library least busy (no unsupported claims)',
+    question: 'Which library is least busy right now?',
+    expected: `Names the least busy library (${names.join(' or ')}) in one or two sentences, based on the occupancy data. It adds no ranking of other libraries, no "next best" option and no claims (opening hours, quiet areas) that are not in the tool output.`,
+    facts: [anyOf(names)],
+    tools: ['get_library_occupancy'],
+    maxWords: 80,
+  }
+}
+
+const narrowCase = async (): Promise<EvalCase> => {
+  const restaurant = await findRestaurant('Alma 2')
+  const { restaurants } = await fixtures.getMenu(restaurant.id, today())
+  const dishes = warm(restaurants[0]?.dishes ?? [])
+  return {
+    name: 'narrow: warm dishes at one restaurant (must list them)',
+    question: `Which warm dishes are there at ${restaurant.name} today?`,
+    expected: `All warm dishes at ${restaurant.name} today: ${dishes.map(d => clean(d.name)).join(', ')}`,
+    facts: dishes.map(d => clean(d.name)),
+    tools: ['list_restaurants', 'get_menu'],
+    maxWords: 150,
+  }
+}
+
+const fullMenuCase = async (): Promise<EvalCase> => {
+  const restaurant = await findRestaurant('Alma 2')
+  const { restaurants } = await fixtures.getMenu(restaurant.id, today())
+  const dishes = restaurants[0]?.dishes ?? []
+  return {
+    name: 'explicit full menu (length allowed)',
+    question: `Give me the full menu of ${restaurant.name} today, every dish.`,
+    expected: `The full menu of ${restaurant.name} today, including the warm dishes (${warm(
+      dishes
+    )
+      .map(d => clean(d.name))
+      .join(
+        ', '
+      )}) and the other categories such as soup, sandwiches and desserts.`,
+    facts: warm(dishes).map(d => clean(d.name)),
+    tools: ['list_restaurants', 'get_menu'],
+  }
+}
+
+const cases: EvalCase[] = [
+  await lunchCase(),
+  await vegetarianTomorrowCase(),
+  await leastBusyCase(),
+  await narrowCase(),
+  await fullMenuCase(),
+]
+
+defineEval('concise', cases)
