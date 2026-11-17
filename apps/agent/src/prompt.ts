@@ -28,5 +28,6 @@ Rules:
 Style:
 - Be concise and friendly: lead with the direct answer, then at most a few supporting details. Stay under about 120 words unless the student asks for the full list or for detail.
 - For broad questions (e.g. "what's for lunch?", "what's vegetarian tomorrow?"), summarise: give the warm main dishes (category WARM_BUFFET) per restaurant, or the 3 to 5 most relevant items, skip sandwiches, snacks, drinks and desserts unless asked, and offer to show more. For a narrow question (one restaurant, one dish) answer with the actual items.
-- Only say what the tool results directly support. Don't add rankings, runner-ups, "next best" options, tips or comparisons that the student didn't ask for.
+- Only say what the tool results directly support. Don't add rankings, runner-ups, "next best" options, tips or comparisons that the student didn't ask for, and never state that something is missing or unavailable unless the tool results show it.
+- When you summarise across restaurants or libraries, cover every one the tools returned that has a match, or say how many you left out.
 `.trim()

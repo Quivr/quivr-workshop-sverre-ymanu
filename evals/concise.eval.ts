@@ -32,43 +32,46 @@ const menus = async (date: string) => {
   )
 }
 
+/** Hot main dishes: free add-ons such as grated cheese are also WARM_BUFFET. */
 const warm = (dishes: Dish[]) =>
-  dishes.filter(dish => dish.mealCategory === 'WARM_BUFFET')
+  dishes.filter(
+    dish => dish.mealCategory === 'WARM_BUFFET' && !/for free/i.test(dish.name)
+  )
+
+const summary = (rows: { name: string; dishes: Dish[] }[]) =>
+  rows
+    .map(row => `${row.name}: ${row.dishes.map(d => clean(d.name)).join(', ')}`)
+    .join('; ')
 
 const lunchCase = async (): Promise<EvalCase> => {
-  const open = (await menus(today())).filter(m => warm(m.dishes).length)
+  const all = await menus(today())
+  const rows = all
+    .map(m => ({ name: m.name, dishes: warm(m.dishes) }))
+    .filter(m => m.dishes.length)
+  const none = all.filter(m => !warm(m.dishes).length).map(m => m.name)
   return {
     name: 'broad: lunch today (summary, not every dish)',
     question: "What's for lunch at the student restaurants today?",
-    expected: `A short summary of the warm main dishes at the open restaurants (${open.map(m => m.name).join(', ')}), for example ${warm(
-      open[0]?.dishes ?? []
-    )
-      .map(d => clean(d.name))
-      .join(
-        ', '
-      )}, without listing every sandwich, snack and drink. It may offer to show more.`,
-    facts: [anyOf(open.flatMap(m => warm(m.dishes)).map(d => clean(d.name)))],
+    expected: `A short summary of the warm main dishes. Exactly these restaurants have warm main dishes today: ${summary(rows)}. The assistant covers all of them (it may shorten each list). The other restaurants (${none.join(', ')}) have no warm main dishes today (Alma ESAT2 only lists free grated cheese), so saying they have none is correct. It does not list every sandwich, snack and drink. It may offer to show more.`,
+    facts: rows.map(r => r.name),
     tools: ['list_restaurants', 'get_menu'],
     maxWords: 150,
   }
 }
 
 const vegetarianTomorrowCase = async (): Promise<EvalCase> => {
-  const open = (await menus(tomorrow())).map(m => ({
-    name: m.name,
-    dishes: warm(m.dishes).filter(d => d.vegetarian || d.vegan),
-  }))
+  const all = await menus(tomorrow())
+  const rows = all
+    .map(m => ({
+      name: m.name,
+      dishes: warm(m.dishes).filter(d => d.vegetarian || d.vegan),
+    }))
+    .filter(m => m.dishes.length)
   return {
     name: 'broad: vegetarian tomorrow (summary)',
     question: "What's vegetarian at the student restaurants tomorrow?",
-    expected: `A short summary of vegetarian (including vegan) warm dishes tomorrow, such as ${open
-      .flatMap(m => m.dishes)
-      .slice(0, 4)
-      .map(d => clean(d.name))
-      .join(
-        ', '
-      )}. It does not dump every vegetarian sandwich, snack and dessert and may offer to show more.`,
-    facts: [anyOf(open.flatMap(m => m.dishes).map(d => clean(d.name)))],
+    expected: `A short summary of vegetarian (including vegan) warm main dishes tomorrow. Exactly these restaurants have them: ${summary(rows)}. The assistant covers all of them. Other restaurants have no vegetarian warm main dish (free grated cheese does not count as a dish). It does not dump every vegetarian sandwich, snack and dessert and may offer to show more.`,
+    facts: rows.map(r => r.name),
     tools: ['list_restaurants', 'get_menu'],
     maxWords: 150,
   }

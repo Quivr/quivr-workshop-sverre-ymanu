@@ -161,6 +161,8 @@ export const judge = async (
 The tool results are the source of truth: extra details that appear in them (prices, addresses, opening hours) are fine.
 Score 1 if it gives the key information of the expected answer and invents nothing, 0.5 if partly right, 0 if wrong or made up.
 
+The tool results may be cut off. The expected answer is computed from the complete data, so trust it where the tool results are incomplete.
+
 Question: ${question}
 Expected answer: ${expected}
 Tool results: ${toolEvidence(result)}
