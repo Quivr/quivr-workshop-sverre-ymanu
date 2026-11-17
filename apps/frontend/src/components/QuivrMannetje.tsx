@@ -40,10 +40,15 @@ const COMFY_DISTANCE = 80 // he likes to stand about this far from the cursor
 const TOO_CLOSE = 45 // closer than this and he steps away (tag!)
 const LOOK_RANGE = 2.5 // how far the eyes move inside the Q, in SVG units
 const SPEAK_DELAY_MS = 80
-const AUTO_CLOSE_MS = 25000 // the opening tour closes itself this long after the last step change
+// The opening tour moves on by itself: reading time = base + per character
+const READ_BASE_MS = 4000
+const READ_PER_CHAR_MS = 70
 const CORNERED_DISTANCE = 20 // a flee target closer than this means he is stuck against an edge
 const IS_SPEECH_SUPPORTED =
   typeof window !== 'undefined' && 'speechSynthesis' in window
+
+const isPageVisible = () =>
+  typeof document === 'undefined' || document.visibilityState === 'visible'
 
 const readMuted = () => {
   try {
@@ -215,6 +220,10 @@ export function QuivrMannetje() {
   const [isOpen, setIsOpen] = useState(true)
   // The tour that opens by itself closes by itself; one the user asked for stays
   const [isAutoTour, setIsAutoTour] = useState(true)
+  // The auto tour only runs while the page is visible and the user is not
+  // hovering over the bubble (they are reading it)
+  const [isVisible, setIsVisible] = useState(isPageVisible)
+  const [isHovering, setIsHovering] = useState(false)
   const [step, setStep] = useState(0)
   const [isMuted, setIsMuted] = useState(readMuted)
   const [isTalking, setIsTalking] = useState(false)
@@ -247,6 +256,7 @@ export function QuivrMannetje() {
     if (bubbleRef.current?.contains(document.activeElement)) {
       helpRef.current?.focus()
     }
+    setIsHovering(false)
     setIsOpen(false)
   }, [])
 
@@ -344,13 +354,27 @@ export function QuivrMannetje() {
     }
   }, [canSpeak, hasStarted])
 
-  // While the tour is open he is pinned home, so an ignored tour (speech
-  // blocked, user reading something else) must not hold him there forever
   useEffect(() => {
-    if (!isOpen || !isAutoTour) return
-    const timer = window.setTimeout(close, AUTO_CLOSE_MS)
+    const update = () => setIsVisible(isPageVisible())
+    document.addEventListener('visibilitychange', update)
+    return () => document.removeEventListener('visibilitychange', update)
+  }, [])
+
+  // While the tour is open he is pinned home, so an ignored tour must not hold
+  // him there forever. The opening tour therefore walks through the steps by
+  // itself, each shown long enough to read (and speak), and closes after the
+  // last one. It waits while the page is hidden or the bubble is hovered. It
+  // does not depend on the window having focus: you can watch it unfocused.
+  useEffect(() => {
+    if (!isOpen || !isAutoTour || !isVisible || isHovering) return
+    const delay =
+      READ_BASE_MS + (STEPS[step]?.text.length ?? 0) * READ_PER_CHAR_MS
+    const timer = window.setTimeout(
+      isLast ? close : () => setStep(value => value + 1),
+      delay
+    )
     return () => window.clearTimeout(timer)
-  }, [isOpen, isAutoTour, step, close])
+  }, [isOpen, isAutoTour, isVisible, isHovering, step, isLast, close])
 
   // Updated in a layout effect so the animation loop never reads a stale value
   useLayoutEffect(() => {
@@ -546,6 +570,8 @@ export function QuivrMannetje() {
             ref={bubbleRef}
             role="dialog"
             aria-label="quivr-mannetje tour"
+            onPointerEnter={() => setIsHovering(true)}
+            onPointerLeave={() => setIsHovering(false)}
             className="quivr-mannetje-bubble border-schedule-border-grey bg-surface text-main-text pointer-events-auto relative w-72 max-w-full rounded-xl border p-3 text-sm shadow-lg"
           >
             <div className="mb-1 flex items-center gap-2">
