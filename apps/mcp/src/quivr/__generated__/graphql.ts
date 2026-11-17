@@ -48,6 +48,14 @@ export type EventInviteInput = {
   recipientIds: Array<string | number>;
 };
 
+/**
+ * Describes a locale.
+ *
+ */
+export type LocaleEnum =
+  | 'EN'
+  | 'NL';
+
 export type LocationInput = {
   address?: string | null | undefined;
   latitude?: number | null | undefined;
@@ -157,6 +165,16 @@ export type NewsTopicsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type NewsTopicsQuery = { newsArticlesTopics: Array<string> };
+
+export type PartnerCardsQueryVariables = Exact<{
+  first: number;
+}>;
+
+
+export type PartnerCardsQuery = { partnerCards: { nodes: Array<{ id: string, isTemplate: boolean, dateValid: string, dateInvalid: string, company: { name: string, description: string } | null, translations: Array<{ locale: LocaleEnum, title: string, body: string, footnote: string | null }>, action:
+        | { url: string }
+        | Record<PropertyKey, never>
+       | null } | null> | null } };
 
 export type RestaurantsQueryVariables = Exact<{ [key: string]: never; }>;
 

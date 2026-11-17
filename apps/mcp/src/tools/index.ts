@@ -8,6 +8,7 @@ import { getLibraryOccupancy } from './get-library-occupancy.js'
 import { getMenu } from './get-menu.js'
 import { getMySchedule } from './get-my-schedule.js'
 import { getNews } from './get-news.js'
+import { getPartnerDeals } from './get-partner-deals.js'
 import { getStudentBars } from './get-student-bars.js'
 import { getTodayOverview } from './get-today-overview.js'
 import { listRestaurants } from './list-restaurants.js'
@@ -25,6 +26,7 @@ export const tools = [
   findCommonFreeSlots,
   getNews,
   getStudentBars,
+  getPartnerDeals,
   getTodayOverview,
   draftInvite,
   sendInvite,

@@ -1,0 +1,25 @@
+query PartnerCards($first: Int!) {
+  partnerCards(first: $first) {
+    nodes {
+      id
+      isTemplate
+      dateValid
+      dateInvalid
+      company {
+        name
+        description
+      }
+      translations {
+        locale
+        title
+        body
+        footnote
+      }
+      action {
+        ... on ActionExternal {
+          url
+        }
+      }
+    }
+  }
+}

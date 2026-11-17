@@ -9,6 +9,7 @@ import { getMySchedule } from './get-my-schedule.js'
 import { findCommonFreeSlots } from './find-common-free-slots.js'
 import { getFriends } from './get-friends.js'
 import { getNews } from './get-news.js'
+import { getPartnerDeals } from './get-partner-deals.js'
 import { getStudentBars } from './get-student-bars.js'
 import { getTodayOverview } from './get-today-overview.js'
 import { enabledTools, tools } from './index.js'
@@ -457,6 +458,137 @@ describe('get_news', () => {
     expect(await getNews.run({}, newsQuivr(null).quivr)).toMatchObject({
       articles: [],
     })
+  })
+})
+
+describe('get_partner_deals', () => {
+  const card = (
+    partner: string,
+    title: string,
+    body: string,
+    overrides: object = {}
+  ) => ({
+    id: partner,
+    isTemplate: false,
+    dateValid: '2020-01-01T00:00:00+01:00',
+    dateInvalid: '2999-01-01T00:00:00+01:00',
+    company: { name: partner, description: 'Food & drinks' },
+    translations: [
+      { locale: 'NL', title: 'Nederlands', body: 'nl', footnote: null },
+      { locale: 'EN', title, body, footnote: null },
+    ],
+    action: { url: `https://example.invalid/${partner}` },
+    ...overrides,
+  })
+  const cards = [
+    card(
+      'Café Alpha',
+      '2 for 1 pizza',
+      '<p>Second <b>pizza</b>&nbsp;free &amp; more</p>'
+    ),
+    card('Gym Beta', '10% off', 'Reduced membership', {
+      action: null,
+      company: { name: 'Gym Beta', description: 'Fitness' },
+    }),
+    card('Old Shop', 'Pizza forever', 'ended', {
+      dateInvalid: '2000-01-01T00:00:00+01:00',
+    }),
+    card('Template', 'Pizza template', 'x', { isTemplate: true }),
+  ]
+  const fakeDeals = fakeQuivr({
+    getPartnerCards: async () =>
+      ({ partnerCards: { nodes: [...cards, null] } }) as never,
+  })
+
+  it('returns compact deals, preferring English and skipping expired and template cards', async () => {
+    const result = await getPartnerDeals.run({}, fakeDeals)
+
+    expect(result).toMatchObject({
+      total: 2,
+      deals: [
+        {
+          partner: 'Café Alpha',
+          title: '2 for 1 pizza',
+          url: 'https://example.invalid/Café Alpha',
+          validUntil: '2999-01-01T00:00:00+01:00',
+        },
+        { partner: 'Gym Beta', title: '10% off', url: undefined },
+      ],
+    })
+  })
+
+  it('strips HTML from the deal text', async () => {
+    const { deals } = (await getPartnerDeals.run({}, fakeDeals)) as {
+      deals: { details: string }[]
+    }
+
+    expect(deals[0]?.details).toBe('Second pizza free & more')
+  })
+
+  it('filters case- and accent-insensitively on name, description and deal text', async () => {
+    const byName = (await getPartnerDeals.run(
+      { query: 'CAFE' },
+      fakeDeals
+    )) as {
+      deals: { partner: string }[]
+    }
+    const byText = (await getPartnerDeals.run(
+      { query: 'Pizza' },
+      fakeDeals
+    )) as {
+      deals: { partner: string }[]
+    }
+    const byCategory = (await getPartnerDeals.run(
+      { query: 'fitness' },
+      fakeDeals
+    )) as { deals: { partner: string }[] }
+
+    expect(byName.deals.map(d => d.partner)).toEqual(['Café Alpha'])
+    expect(byText.deals.map(d => d.partner)).toEqual(['Café Alpha'])
+    expect(byCategory.deals.map(d => d.partner)).toEqual(['Gym Beta'])
+  })
+
+  it('returns no deals when nothing matches', async () => {
+    const result = await getPartnerDeals.run({ query: 'sushi' }, fakeDeals)
+
+    expect(result).toMatchObject({ query: 'sushi', deals: [], total: 0 })
+  })
+
+  it('caps the limit and the text length', async () => {
+    const many = Array.from({ length: 30 }, (_, i) =>
+      card(`Shop ${i}`, 'Deal', 'x'.repeat(500))
+    )
+    const quivr = fakeQuivr({
+      getPartnerCards: async () => ({ partnerCards: { nodes: many } }) as never,
+    })
+
+    const defaults = (await getPartnerDeals.run({}, quivr)) as {
+      deals: { details: string }[]
+      total: number
+    }
+    const capped = (await getPartnerDeals.run({ limit: 20 }, quivr)) as {
+      deals: unknown[]
+    }
+
+    expect(defaults.deals).toHaveLength(8)
+    expect(defaults.total).toBe(30)
+    expect(defaults.deals[0]?.details.length).toBeLessThanOrEqual(201)
+    expect(capped.deals).toHaveLength(20)
+  })
+
+  it('copes with cards without translations or company', async () => {
+    const quivr = fakeQuivr({
+      getPartnerCards: async () =>
+        ({
+          partnerCards: {
+            nodes: [card('X', 't', 'b', { translations: [], company: null })],
+          },
+        }) as never,
+    })
+
+    const result = await getPartnerDeals.run({}, quivr)
+
+    expect(result).toMatchObject({ total: 0, deals: [] })
   })
 })
 

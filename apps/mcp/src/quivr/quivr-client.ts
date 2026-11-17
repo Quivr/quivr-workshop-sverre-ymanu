@@ -22,6 +22,7 @@ import type {
   MyScheduleQuery,
   NewsQuery,
   NewsTopicsQuery,
+  PartnerCardsQuery,
   RestaurantsQuery,
 } from './__generated__/graphql.js'
 import { dayRange } from './dates.js'
@@ -100,6 +101,10 @@ export class QuivrClient {
 
   getStudentBars(onlyShowOpen: boolean): Promise<FakbarsQuery> {
     return this.request('Fakbars', { onlyShowOpen })
+  }
+
+  getPartnerCards(first: number): Promise<PartnerCardsQuery> {
+    return this.request('PartnerCards', { first })
   }
 
   /**
