@@ -385,3 +385,310 @@ body {
   outline: 3px solid var(--color-main);
   outline-offset: 2px;
 }
+
+/* dice-roll: the D20 overlay. Colours come from tokens, so it follows light/dark mode. */
+.dice-overlay {
+  background: color-mix(
+    in srgb,
+    var(--color-schedule-bg-grey) 85%,
+    transparent
+  );
+}
+
+.dice-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--dice-tint, transparent);
+  transition: background 300ms;
+}
+
+.dice-overlay[data-outcome='jackpot'] {
+  --dice-tint: color-mix(in srgb, var(--color-main) 20%, transparent);
+}
+
+.dice-overlay[data-outcome='fail'] {
+  --dice-tint: color-mix(in srgb, var(--color-danger) 22%, transparent);
+}
+
+.dice-stage {
+  --dice-accent: var(--color-heading);
+  --dice-edge: var(--color-heading);
+}
+
+.dice-stage[data-outcome='jackpot'] {
+  --dice-accent: var(--color-main);
+  --dice-edge: var(--color-main);
+}
+
+.dice-stage[data-outcome='fail'] {
+  --dice-accent: var(--color-danger);
+  --dice-edge: var(--color-danger);
+}
+
+.dice-die {
+  position: relative;
+  width: 170px;
+  height: 170px;
+}
+
+.dice-ring {
+  position: absolute;
+  inset: -8px;
+  border-radius: 9999px;
+  border: 3px solid var(--dice-accent);
+  box-shadow: 0 0 28px var(--dice-accent);
+  opacity: 0;
+  animation: dice-ring-pulse 650ms ease-out infinite;
+}
+
+.dice-stage[data-phase='landed'] .dice-ring {
+  animation: dice-ring-pulse 900ms ease-out 2;
+}
+
+/* The perspective sits on the element that throws the die, so the 3D spin inside is projected */
+.dice-throw {
+  position: absolute;
+  inset: 0;
+  perspective: 800px;
+  animation: dice-throw var(--dice-ms) ease-in-out both;
+}
+
+.dice-spin {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: var(--dice-land);
+  animation: dice-spin var(--dice-ms) linear both;
+}
+
+.dice-face {
+  position: absolute;
+  background: var(--dice-edge);
+  clip-path: polygon(50% 0, 0 100%, 100% 100%);
+  backface-visibility: hidden;
+  transition: background-color 300ms;
+}
+
+.dice-face::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  clip-path: polygon(50% 5.5%, 4.5% 97%, 95.5% 97%);
+  background: color-mix(
+    in srgb,
+    var(--color-surface),
+    var(--color-heading) var(--tint, 0%)
+  );
+}
+
+.dice-face-number {
+  position: absolute;
+  left: 50%;
+  top: 66.6667%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-title);
+  font-size: 24px;
+  line-height: 1;
+  color: var(--color-heading);
+}
+
+.dice-number[data-rolling='true'] {
+  opacity: 0.55;
+}
+
+.dice-number[data-rolling='false'],
+.dice-label {
+  animation: dice-reveal 450ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.dice-stage[data-phase='landed'][data-outcome='fail'] {
+  animation: dice-thud 500ms ease-out both;
+}
+
+.dice-burst {
+  position: absolute;
+  inset: -30px;
+  border-radius: 9999px;
+  pointer-events: none;
+  background: radial-gradient(circle, var(--color-main) 0%, transparent 68%);
+  animation: dice-burst 900ms ease-out both;
+}
+
+.dice-burst::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 4px solid var(--color-main);
+  animation: dice-burst 1100ms ease-out 150ms both;
+}
+
+.dice-confetti {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.dice-confetti-piece {
+  position: absolute;
+  top: -20px;
+  border-radius: 2px;
+  animation: dice-confetti var(--dur) linear var(--delay) both;
+}
+
+@keyframes dice-throw {
+  0% {
+    transform: translate(0, -60px) scale(0.4, 0.4);
+    opacity: 0;
+  }
+  12% {
+    transform: translate(0, 0) scale(1, 1);
+    opacity: 1;
+  }
+  24% {
+    transform: translate(-10px, -18px) scale(1, 1);
+  }
+  36% {
+    transform: translate(10px, -6px) scale(1, 1);
+  }
+  48% {
+    transform: translate(-8px, -22px) scale(1, 1);
+  }
+  58% {
+    transform: translate(8px, -4px) scale(1, 1);
+  }
+  70% {
+    transform: translate(0, -90px) scale(1.2, 1.2);
+  }
+  82% {
+    transform: translate(0, 0) scale(1.12, 0.88);
+  }
+  90% {
+    transform: translate(0, -22px) scale(0.98, 1.04);
+  }
+  96% {
+    transform: translate(0, 0) scale(1.03, 0.97);
+  }
+  100% {
+    transform: translate(0, 0) scale(1, 1);
+  }
+}
+
+@keyframes dice-spin {
+  0% {
+    transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+    animation-timing-function: cubic-bezier(0.2, 0.5, 0.6, 1);
+  }
+  70% {
+    transform: rotateX(900deg) rotateY(1080deg) rotateZ(200deg);
+    animation-timing-function: cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+  100% {
+    transform: var(--dice-land);
+  }
+}
+
+@keyframes dice-ring-pulse {
+  from {
+    transform: scale(0.75);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+@keyframes dice-reveal {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes dice-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes dice-burst {
+  from {
+    transform: scale(0.2);
+    opacity: 0.9;
+  }
+  to {
+    transform: scale(3.2);
+    opacity: 0;
+  }
+}
+
+@keyframes dice-thud {
+  0% {
+    transform: translate(0, 0);
+  }
+  12% {
+    transform: translate(0, 10px);
+  }
+  24% {
+    transform: translate(-7px, -3px);
+  }
+  36% {
+    transform: translate(6px, 4px);
+  }
+  50% {
+    transform: translate(-4px, -2px);
+  }
+  64% {
+    transform: translate(3px, 1px);
+  }
+  80% {
+    transform: translate(-2px, 0);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes dice-confetti {
+  from {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  to {
+    transform: translate3d(var(--drift), 105vh, 0) rotate(900deg);
+    opacity: 0.9;
+  }
+}
+
+/* Reduced motion: no tumbling, throwing, shaking or confetti. The die just fades in on its landing side. */
+@media (prefers-reduced-motion: reduce) {
+  .dice-throw,
+  .dice-spin,
+  .dice-ring,
+  .dice-burst,
+  .dice-burst::after,
+  .dice-confetti-piece,
+  .dice-stage[data-phase] {
+    animation: none !important;
+  }
+
+  .dice-die,
+  .dice-number,
+  .dice-label {
+    animation: dice-fade 250ms ease-out both !important;
+  }
+}
