@@ -10,6 +10,7 @@ import {
   type QuivrCredentials,
 } from '../config.js'
 import type {
+  FakbarsQuery,
   LibrariesQuery,
   MenuQuery,
   MyScheduleQuery,
@@ -54,6 +55,10 @@ export class QuivrClient {
 
   getLibraries(): Promise<LibrariesQuery> {
     return this.request('Libraries', {})
+  }
+
+  getStudentBars(onlyShowOpen: boolean): Promise<FakbarsQuery> {
+    return this.request('Fakbars', { onlyShowOpen })
   }
 
   async request<T>(operationName: string, variables: object): Promise<T> {

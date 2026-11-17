@@ -1,0 +1,40 @@
+{
+  "{\"onlyShowOpen\":false}": {
+    "fakbars": [
+      {
+        "id": "9001",
+        "name": "Fake Bar Alpha",
+        "description": "Example student bar used for workshop fixtures.",
+        "fakbarData": { "busyness": "GREEN" }
+      },
+      {
+        "id": "9002",
+        "name": "Fake Bar Beta",
+        "description": "Another example bar with a longer made-up description.",
+        "fakbarData": { "busyness": "RED" }
+      },
+      {
+        "id": "9003",
+        "name": "Fake Bar Gamma",
+        "description": "",
+        "fakbarData": { "busyness": "CLOSED" }
+      }
+    ]
+  },
+  "{\"onlyShowOpen\":true}": {
+    "fakbars": [
+      {
+        "id": "9001",
+        "name": "Fake Bar Alpha",
+        "description": "Example student bar used for workshop fixtures.",
+        "fakbarData": { "busyness": "GREEN" }
+      },
+      {
+        "id": "9002",
+        "name": "Fake Bar Beta",
+        "description": "Another example bar with a longer made-up description.",
+        "fakbarData": { "busyness": "RED" }
+      }
+    ]
+  }
+}
