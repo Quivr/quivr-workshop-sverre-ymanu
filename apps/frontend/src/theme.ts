@@ -19,7 +19,7 @@ export const nextTheme = (theme: Theme): Theme =>
 /**
  * Drunk builds on the dark palette: it sets `dark` as well as `drunk`, so every
  * `dark:` style, the dark tokens and the dark-mode guard keep working. `.drunk`
- * in index.css then only re-tints the tokens and adds the sway.
+ * in index.css then only re-tints the tokens and adds the nausea warp and sway.
  * Keep in sync with the inline script in index.html.
  */
 export const themeClasses = (
