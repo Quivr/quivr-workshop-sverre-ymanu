@@ -1,16 +1,17 @@
 import type { Usage } from './types'
 
 /**
- * ESTIMATED list prices in USD per million tokens. Check the provider's
- * pricing page before relying on them; update when prices change.
+ * ESTIMATED list prices in USD per million tokens (base tier; Haiku costs more
+ * above 100k tokens of context, and cached tokens are not modelled). Update
+ * when prices change.
  * A model that is not listed gets no cost.
  */
 const PRICES_PER_MILLION_TOKENS: Record<
   string,
   { input: number; output: number }
 > = {
-  'anthropic:claude-haiku-5-5': { input: 1, output: 5 },
-  'anthropic:claude-sonnet-5-5': { input: 3, output: 15 },
+  'anthropic:claude-haiku-5-5': { input: 0.1, output: 0.5 },
+  'anthropic:claude-sonnet-5-5': { input: 2, output: 10 },
 }
 
 /** Estimated cost in USD, or undefined when the model or usage is unknown. */

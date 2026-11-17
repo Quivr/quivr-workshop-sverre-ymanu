@@ -8,13 +8,13 @@ describe('estimateCost', () => {
       inputTokens: 1_000_000,
       outputTokens: 100_000,
     })
-    expect(cost).toBeCloseTo(1.5)
+    expect(cost).toBeCloseTo(0.15)
   })
 
   it('treats a missing side as zero tokens', () => {
     expect(
       estimateCost('anthropic:claude-haiku-5-5', { inputTokens: 1_000_000 })
-    ).toBeCloseTo(1)
+    ).toBeCloseTo(0.1)
   })
 
   it('returns undefined for unknown models or missing usage', () => {
