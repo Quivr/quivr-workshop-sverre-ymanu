@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { isNearBottom } from './chatHelpers'
 import { loadChat, saveChat, toMarkdown } from './chatStorage'
 import { DEFAULT_DC } from './dice/check'
+import { parseCommand } from './commands'
 import { gateSend } from './dice/gate'
 import { CheckOverlay } from './components/CheckOverlay'
 import { Composer } from './components/Composer'
@@ -29,6 +30,8 @@ export function App() {
   const [isShowingTraces, setIsShowingTraces] = useState(false)
   const [draft, setDraft] = useState('')
   const [isDiceRolling, setIsDiceRolling] = useState(false)
+  // Extra quivr-mannetjes called with /summon: there is no limit
+  const [summoned, setSummoned] = useState(0)
   const { isDungeonMode, toggle: toggleDungeonMode } = useDungeonMode()
   const { stats, addRoll, addCheck } = useDiceStats()
   const mainRef = useRef<HTMLElement>(null)
@@ -91,6 +94,13 @@ export function App() {
 
   /** Send, roll a check first (Dungeon mode) or do nothing. The text is sent exactly as typed. */
   const handleSubmit = (text: string) => {
+    // Slash commands are for the app, not the assistant: no message, no dice
+    const command = parseCommand(text)
+    if (command) {
+      setSummoned(count => count + command.count)
+      setDraft('')
+      return
+    }
     const action = gateSend({
       dungeonMode: isDungeonMode,
       isRunning: chat.isRunning,
@@ -176,7 +186,10 @@ export function App() {
         onLand={check.land}
         onClose={check.close}
       />
-      <QuivrMannetje model={model} />
+      <QuivrMannetje
+        model={model}
+        summoned={summoned}
+      />
       <SideVideo />
       <PopupAds />
     </div>

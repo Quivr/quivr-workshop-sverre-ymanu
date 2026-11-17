@@ -736,3 +736,16 @@ body {
 .dice-column[data-dim='true'] {
   opacity: 0.4;
 }
+
+/* The bubble hangs above or below him: the tail points at him (--tail-x is set from the component) */
+.quivr-mannetje-tail {
+  left: calc(var(--tail-x, 50%) - 6px);
+  bottom: -7px;
+  transform: rotate(45deg);
+}
+
+[data-side='below'] .quivr-mannetje-tail {
+  top: -7px;
+  bottom: auto;
+  transform: rotate(225deg);
+}

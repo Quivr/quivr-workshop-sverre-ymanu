@@ -7,9 +7,35 @@ import {
   useState,
 } from 'react'
 
-import { describeElement, describeSelection, isOwnUi } from '../explainDom'
-import type { ExplainTarget } from '../explain'
-import { useExplain } from '../useExplain'
+import {
+  describeElement,
+  describeSelection,
+  isOwnUi,
+  type Explained,
+} from '../explainDom'
+import { placeSprite, usePrefersReducedMotion } from '../mannetjeDom'
+import {
+  bubblePlacement,
+  MARGIN,
+  standOn,
+  type Point,
+} from '../mannetjePlacement'
+import {
+  lookAt,
+  moveToward,
+  newRoamer,
+  randomPoint,
+  roam,
+  RUN_SPEED,
+  SIZE,
+  SPIN_MS,
+  WALK_SPEED,
+  type Mode,
+  type Pointer,
+} from '../mannetjeRoam'
+import { useExplain, type ExplainState } from '../useExplain'
+import { MannetjeCrowd } from './MannetjeCrowd'
+import { Mannetje } from './MannetjeSprite'
 
 const STEPS = [
   {
@@ -30,7 +56,7 @@ const STEPS = [
   },
   {
     title: 'Explain anything',
-    text: 'Press the magnifier button next to me, then click anything on the page or select some text, and I will explain it. Press Escape to stop.',
+    text: 'Press the magnifier button next to me, then click anything on the page or select some text. I will walk over, jump on it and explain it. Press Escape to stop.',
   },
   {
     title: 'Give it a try',
@@ -38,16 +64,9 @@ const STEPS = [
   },
 ]
 
+type ExplainStatus = ExplainState['status']
+
 const MUTED_KEY = 'mannetje-muted'
-const SIZE = 56 // px, matches h-14 w-14
-const MARGIN = 8 // keep this far from the viewport edge
-const WALK_SPEED = 70 // px per second
-const RUN_SPEED = 240
-const CURIOUS_MS = 4000 // how long after the last mouse move he stays interested
-const CURIOUS_RADIUS = 280 // he notices the cursor within this distance
-const COMFY_DISTANCE = 80 // he likes to stand about this far from the cursor
-const TOO_CLOSE = 45 // closer than this and he steps away (tag!)
-const LOOK_RANGE = 2.5 // how far the eyes move inside the Q, in SVG units
 const SPEAK_DELAY_MS = 80
 // The opening tour moves on by itself: reading time = base + per character
 const READ_BASE_MS = 4000
@@ -56,7 +75,6 @@ const READ_PER_CHAR_MS = 70
 const EXPLAIN_PER_CHAR_MS = 90
 // Wait a moment after a click: a drag or double click ends in a text selection
 const ELEMENT_CLICK_DELAY_MS = 250
-const CORNERED_DISTANCE = 20 // a flee target closer than this means he is stuck against an edge
 const IS_SPEECH_SUPPORTED =
   typeof window !== 'undefined' && 'speechSynthesis' in window
 
@@ -86,152 +104,20 @@ const iconButtonClass =
 const iconButtonOnClass =
   'border-sidenav-blue bg-main text-sidenav-blue pointer-events-auto flex h-7 w-7 items-center justify-center rounded-full border text-sm shadow-sm'
 
-type Point = { x: number; y: number }
-
-const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'
-
-function usePrefersReducedMotion() {
-  const [isReduced, setIsReduced] = useState(
-    () =>
-      typeof window !== 'undefined' &&
-      window.matchMedia(REDUCED_MOTION_QUERY).matches
-  )
-
-  useEffect(() => {
-    const query = window.matchMedia(REDUCED_MOTION_QUERY)
-    const update = () => setIsReduced(query.matches)
-    query.addEventListener('change', update)
-    return () => query.removeEventListener('change', update)
-  }, [])
-
-  return isReduced
-}
-
 const homePoint = (element: HTMLElement | null): Point => {
   const rect = element?.getBoundingClientRect()
   return rect ? { x: rect.left, y: rect.top } : { x: MARGIN, y: MARGIN }
 }
 
-// The upper bound never drops below MARGIN, so a tiny viewport can't flip the range
-const clampPoint = (point: Point): Point => ({
-  x: Math.min(
-    Math.max(point.x, MARGIN),
-    Math.max(MARGIN, window.innerWidth - SIZE - MARGIN)
-  ),
-  y: Math.min(
-    Math.max(point.y, MARGIN),
-    Math.max(MARGIN, window.innerHeight - SIZE - MARGIN)
-  ),
-})
-
-const randomPoint = (): Point =>
-  clampPoint({
-    x: Math.random() * window.innerWidth,
-    y: Math.random() * window.innerHeight,
-  })
-
-const placeSprite = (element: HTMLElement, point: Point) => {
-  element.style.transform = `translate3d(${point.x.toFixed(1)}px, ${point.y.toFixed(1)}px, 0)`
-}
-
-/** The yellow letter Q: a ring with a face in the hole and a tail. */
-function Mannetje({ isTalking }: { isTalking: boolean }) {
-  return (
-    <div className="quivr-mannetje-pop h-full w-full">
-      <div className="quivr-mannetje-bob h-full w-full">
-        <svg
-          viewBox="0 0 56 56"
-          className="h-full w-full"
-          role="img"
-          aria-label="quivr-mannetje"
-        >
-          <ellipse
-            className="quivr-mannetje-foot quivr-mannetje-foot-left"
-            cx="21"
-            cy="50"
-            rx="5"
-            ry="2.5"
-            fill="#34495e"
-          />
-          <ellipse
-            className="quivr-mannetje-foot quivr-mannetje-foot-right"
-            cx="35"
-            cy="50"
-            rx="5"
-            ry="2.5"
-            fill="#34495e"
-          />
-          {/* Tail of the Q: outline first, drawn under the ring */}
-          <path
-            d="M32 29 L47 45"
-            stroke="#34495e"
-            strokeWidth="9"
-            strokeLinecap="round"
-          />
-          <path
-            d="M32 29 L47 45"
-            stroke="#ffd750"
-            strokeWidth="4.5"
-            strokeLinecap="round"
-          />
-          <circle
-            cx="28"
-            cy="25"
-            r="19"
-            fill="#ffd750"
-            stroke="#34495e"
-            strokeWidth="2.5"
-          />
-          <circle
-            cx="28"
-            cy="25"
-            r="10.5"
-            fill="#34495e"
-          />
-          <g className="quivr-mannetje-look">
-            <ellipse
-              className="quivr-mannetje-eye"
-              cx="24"
-              cy="22.5"
-              rx="1.9"
-              ry="2.8"
-              fill="#ffd750"
-            />
-            <ellipse
-              className="quivr-mannetje-eye"
-              cx="32"
-              cy="22.5"
-              rx="1.9"
-              ry="2.8"
-              fill="#ffd750"
-            />
-            {isTalking ? (
-              <ellipse
-                className="quivr-mannetje-mouth-talking"
-                cx="28"
-                cy="30"
-                rx="3.2"
-                ry="2.8"
-                fill="#ffd750"
-              />
-            ) : (
-              <path
-                d="M23.5 28.5 Q28 33 32.5 28.5"
-                fill="none"
-                stroke="#ffd750"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            )}
-          </g>
-        </svg>
-      </div>
-    </div>
-  )
-}
-
 /** Little Q-shaped guide: gives a spoken tour, then wanders the screen and plays with the cursor. */
-export function QuivrMannetje({ model }: { model: string }) {
+export function QuivrMannetje({
+  model,
+  summoned = 0,
+}: {
+  model: string
+  /** How many extra mannetjes `/summon` has called so far. */
+  summoned?: number
+}) {
   const explainer = useExplain(model)
   const { state: explanation, dismiss: dismissExplanation } = explainer
   // Explain mode: clicks and text selections are explained instead of used
@@ -264,6 +150,14 @@ export function QuivrMannetje({ model }: { model: string }) {
   const positionRef = useRef<Point>({ x: MARGIN, y: MARGIN })
   const isOpenRef = useRef(isOpen)
   const isReducedMotion = usePrefersReducedMotion()
+  // What the animation loop needs to know without re-running (set in layout effects)
+  const stepRef = useRef(step)
+  const isHoveringRef = useRef(isHovering)
+  const isTalkingRef = useRef(isTalking)
+  const explainStatusRef = useRef<ExplainStatus>('idle')
+  // Where the explained text is on screen: he walks there and jumps on it
+  const anchorRef = useRef<(() => DOMRect | null) | null>(null)
+  const bubbleBoxRef = useRef<HTMLDivElement>(null)
 
   const isExplaining = explanation.status !== 'idle'
   const current = STEPS[step]
@@ -281,6 +175,7 @@ export function QuivrMannetje({ model }: { model: string }) {
     if (bubbleRef.current?.contains(document.activeElement)) {
       helpRef.current?.focus()
     }
+    anchorRef.current = null
     setIsHovering(false)
     dismissExplanation()
     setIsOpen(false)
@@ -288,6 +183,7 @@ export function QuivrMannetje({ model }: { model: string }) {
 
   const open = () => {
     shouldFocusNextRef.current = true
+    anchorRef.current = null
     setIsAutoTour(false)
     dismissExplanation()
     setStep(0)
@@ -300,7 +196,8 @@ export function QuivrMannetje({ model }: { model: string }) {
     setIsExplainMode(value => !value)
   }
 
-  const explainTarget = (target: ExplainTarget) => {
+  const explainTarget = ({ target, anchor }: Explained) => {
+    anchorRef.current = anchor
     setIsAutoTour(false)
     setIsHovering(false)
     setIsOpen(true)
@@ -431,14 +328,19 @@ export function QuivrMannetje({ model }: { model: string }) {
     close,
   ])
 
-  // An explanation closes itself once it has been read, so he goes back to
-  // roaming. A pending or failed one is left for the student to dismiss.
+  // An explanation (or its error) closes itself once it has been read, so he
+  // goes back to roaming. One that is still loading ends when the request does.
   useEffect(() => {
-    if (!isOpen || explanation.status !== 'done' || !isVisible || isHovering) {
-      return
-    }
-    const delay = READ_BASE_MS + explanation.text.length * EXPLAIN_PER_CHAR_MS
-    const timer = window.setTimeout(close, delay)
+    if (!isOpen || !isVisible || isHovering) return
+    if (explanation.status !== 'done' && explanation.status !== 'error') return
+    const length =
+      explanation.status === 'done'
+        ? explanation.text.length
+        : explanation.message.length
+    const timer = window.setTimeout(
+      close,
+      READ_BASE_MS + length * EXPLAIN_PER_CHAR_MS
+    )
     return () => window.clearTimeout(timer)
   }, [isOpen, explanation, isVisible, isHovering, close])
 
@@ -508,7 +410,36 @@ export function QuivrMannetje({ model }: { model: string }) {
   // Updated in a layout effect so the animation loop never reads a stale value
   useLayoutEffect(() => {
     isOpenRef.current = isOpen
-  }, [isOpen])
+    stepRef.current = step
+    isHoveringRef.current = isHovering
+    isTalkingRef.current = isTalking
+    explainStatusRef.current = explanation.status
+  }, [isOpen, step, isHovering, isTalking, explanation.status])
+
+  const getPosition = useCallback(() => positionRef.current, [])
+
+  // The bubble hangs on him: it goes above (or below) the sprite, inside the
+  // viewport. The loop calls this every frame while he walks.
+  const layoutBubble = useCallback(() => {
+    const bubble = bubbleBoxRef.current
+    if (!bubble) return
+    const position = positionRef.current
+    const placement = bubblePlacement(
+      position,
+      SIZE,
+      { width: bubble.offsetWidth, height: bubble.offsetHeight },
+      { width: window.innerWidth, height: window.innerHeight }
+    )
+    bubble.style.transform = `translate3d(${(placement.x - position.x).toFixed(1)}px, ${(placement.y - position.y).toFixed(1)}px, 0)`
+    bubble.style.setProperty('--tail-x', `${placement.tailX.toFixed(1)}px`)
+    if (bubble.dataset.side !== placement.side) {
+      bubble.dataset.side = placement.side
+    }
+  }, [])
+  // Also after every render: the text (and so the size) of the bubble changes
+  useLayoutEffect(() => {
+    layoutBubble()
+  })
 
   // Start at home (next to the "?" button) before the first paint. The point
   // is copied into the existing object: the animation loop holds a reference.
@@ -517,7 +448,8 @@ export function QuivrMannetje({ model }: { model: string }) {
     if (!sprite) return
     Object.assign(positionRef.current, homePoint(homeRef.current))
     placeSprite(sprite, positionRef.current)
-  }, [])
+    layoutBubble()
+  }, [layoutBubble])
 
   // Walking around and playing with the cursor. While the tour is open he
   // stays (or runs back) home so the bubble points at him.
@@ -530,6 +462,7 @@ export function QuivrMannetje({ model }: { model: string }) {
       const goHome = () => {
         Object.assign(positionRef.current, homePoint(homeRef.current))
         placeSprite(sprite, positionRef.current)
+        layoutBubble()
       }
       sprite.dataset.mode = 'idle'
       goHome()
@@ -538,13 +471,17 @@ export function QuivrMannetje({ model }: { model: string }) {
     }
 
     const position = positionRef.current
+    const viewport = () => ({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    })
     let frame = 0
     let last = performance.now()
-    let target: Point | null = null
-    let idleUntil = last + 2500
-    let spinUntil = 0
-    let pointer: (Point & { at: number }) | null = null
+    const roamer = newRoamer(last, 2500)
+    let pointer: Pointer | null = null
     let look = ''
+    let lastStep = stepRef.current
+    let wasOpen = isOpenRef.current
 
     const handleMove = (event: PointerEvent) => {
       pointer = { x: event.clientX, y: event.clientY, at: performance.now() }
@@ -555,102 +492,83 @@ export function QuivrMannetje({ model }: { model: string }) {
       if (isOpenRef.current) return
       const dx = event.clientX - (position.x + SIZE / 2)
       const dy = event.clientY - (position.y + SIZE / 2)
-      if (Math.hypot(dx, dy) < 100) spinUntil = performance.now() + 700
+      if (Math.hypot(dx, dy) < 100) {
+        roamer.spinUntil = performance.now() + SPIN_MS
+      }
     }
 
     const tick = (now: number) => {
       const dt = Math.min((now - last) / 1000, 0.05)
       last = now
 
-      const centre = { x: position.x + SIZE / 2, y: position.y + SIZE / 2 }
-      const isInterested = pointer !== null && now - pointer.at < CURIOUS_MS
-      const distance =
-        isInterested && pointer
-          ? Math.hypot(pointer.x - centre.x, pointer.y - centre.y)
-          : Infinity
-      let mode = 'idle'
-      let speed = WALK_SPEED
+      let mode: Mode = 'idle'
+      let speed: number
+      const isBubbleOpen = isOpenRef.current
+      // Explaining: he runs to the text and stands on it (re-read every frame:
+      // the page can scroll). Without an anchor he stays where he is.
+      const anchor =
+        isBubbleOpen && explainStatusRef.current !== 'idle'
+          ? anchorRef.current?.()
+          : null
+      let isAtText = false
 
-      if (isOpenRef.current) {
-        target = homePoint(homeRef.current)
+      if (isBubbleOpen !== wasOpen) {
+        wasOpen = isBubbleOpen
+        // The bubble closed: a short breather, then he roams again
+        if (!isBubbleOpen) roamer.idleUntil = now + 1500
+      }
+
+      if (anchor) {
+        roamer.target = standOn(anchor, SIZE, viewport())
         speed = RUN_SPEED
-      } else if (now < spinUntil) {
-        target = null
-        mode = 'spin'
-      } else if (pointer && distance < CURIOUS_RADIUS) {
-        const gap = Math.max(distance, 1)
-        const awayX = (centre.x - pointer.x) / gap
-        const awayY = (centre.y - pointer.y) / gap
-        if (distance < TOO_CLOSE) {
-          // Too close: step away
-          target = clampPoint({
-            x: position.x + awayX * 150,
-            y: position.y + awayY * 150,
-          })
-          // Against an edge or corner "away" is clamped onto the spot he is
-          // already on, so he would never move: run somewhere else instead
-          if (
-            Math.hypot(target.x - position.x, target.y - position.y) <
-            CORNERED_DISTANCE
-          ) {
-            target = randomPoint()
-          }
-          speed = RUN_SPEED
-        } else if (distance > COMFY_DISTANCE + 10) {
-          // Curious: walk over, stop a little way from the cursor
-          target = clampPoint({
-            x: pointer.x + awayX * COMFY_DISTANCE - SIZE / 2,
-            y: pointer.y + awayY * COMFY_DISTANCE - SIZE / 2,
-          })
-          speed = WALK_SPEED * 1.8
-        } else {
-          target = null
-          mode = 'hop'
+        isAtText =
+          Math.hypot(
+            roamer.target.x - position.x,
+            roamer.target.y - position.y
+          ) <= 2
+      } else if (isBubbleOpen) {
+        // The tour: he stays put while it is read, and moves on to a new spot
+        // with each step. He stands still while the bubble is hovered, so
+        // Next/Skip never run away from the cursor.
+        if (stepRef.current !== lastStep) {
+          lastStep = stepRef.current
+          if (!isHoveringRef.current) roamer.target = randomPoint(viewport())
         }
-      } else if (!target && now >= idleUntil) {
-        // Nothing going on: wander to a random spot
-        target = randomPoint()
+        if (isHoveringRef.current) roamer.target = null
+        speed = WALK_SPEED * 1.5
+      } else {
+        ;({ mode, speed } = roam(roamer, position, pointer, now, viewport()))
       }
 
-      let heading = 0
-      if (target) {
-        const dx = target.x - position.x
-        const dy = target.y - position.y
-        const remaining = Math.hypot(dx, dy)
-        const step = speed * dt
-        heading = Math.sign(dx)
-        if (remaining <= step) {
-          position.x = target.x
-          position.y = target.y
-          target = null
-          idleUntil = now + 1500 + Math.random() * 3000
-        } else {
-          position.x += (dx / remaining) * step
-          position.y += (dy / remaining) * step
-          mode = 'walk'
-        }
-      }
-      if (!isOpenRef.current) {
-        const clamped = clampPoint(position)
-        position.x = clamped.x
-        position.y = clamped.y
-      }
+      const { isWalking, heading } = moveToward(
+        roamer,
+        position,
+        speed,
+        dt,
+        now,
+        viewport()
+      )
+      if (isWalking) mode = 'walk'
+
       placeSprite(sprite, position)
+      layoutBubble()
+      // Jumps on the text while he waits for the answer and while he talks
+      if (
+        isAtText &&
+        mode === 'idle' &&
+        (explainStatusRef.current === 'loading' || isTalkingRef.current)
+      ) {
+        mode = 'hop'
+      }
       if (sprite.dataset.mode !== mode) sprite.dataset.mode = mode
 
       // Eyes follow the cursor, or the direction he is walking in
-      let lookX = heading * 1.2
-      let lookY = 0
-      if (pointer && distance < 700) {
-        const gap = Math.max(distance, 1)
-        lookX = ((pointer.x - centre.x) / gap) * LOOK_RANGE
-        lookY = ((pointer.y - centre.y) / gap) * LOOK_RANGE
-      }
-      const nextLook = `${lookX.toFixed(1)} ${lookY.toFixed(1)}`
+      const eyes = lookAt(position, pointer, now, heading)
+      const nextLook = `${eyes.x.toFixed(1)} ${eyes.y.toFixed(1)}`
       if (nextLook !== look) {
         look = nextLook
-        sprite.style.setProperty('--look-x', `${lookX.toFixed(1)}px`)
-        sprite.style.setProperty('--look-y', `${lookY.toFixed(1)}px`)
+        sprite.style.setProperty('--look-x', `${eyes.x.toFixed(1)}px`)
+        sprite.style.setProperty('--look-y', `${eyes.y.toFixed(1)}px`)
       }
 
       frame = requestAnimationFrame(tick)
@@ -664,7 +582,7 @@ export function QuivrMannetje({ model }: { model: string }) {
       window.removeEventListener('pointermove', handleMove)
       window.removeEventListener('pointerdown', handleDown)
     }
-  }, [isReducedMotion])
+  }, [isReducedMotion, layoutBubble])
 
   // Escape closes the bubble
   useEffect(() => {
@@ -686,6 +604,10 @@ export function QuivrMannetje({ model }: { model: string }) {
 
   return (
     <>
+      <MannetjeCrowd
+        count={summoned}
+        origin={getPosition}
+      />
       <div
         ref={spriteRef}
         data-mode="idle"
@@ -693,6 +615,114 @@ export function QuivrMannetje({ model }: { model: string }) {
         className="quivr-mannetje pointer-events-none fixed top-0 left-0 z-50 h-14 w-14"
       >
         <Mannetje isTalking={isTalking} />
+        {isOpen && current && (
+          <div
+            ref={bubbleBoxRef}
+            className="absolute top-0 left-0 w-72 max-w-[calc(100vw-1rem)]"
+          >
+            <div
+              ref={bubbleRef}
+              role="dialog"
+              aria-label={
+                isExplaining
+                  ? 'quivr-mannetje explanation'
+                  : 'quivr-mannetje tour'
+              }
+              onPointerEnter={() => setIsHovering(true)}
+              onPointerLeave={() => setIsHovering(false)}
+              className="quivr-mannetje-bubble border-schedule-border-grey bg-surface text-main-text pointer-events-auto relative w-full rounded-xl border p-3 text-sm shadow-lg"
+            >
+              <div className="mb-1 flex items-center gap-2">
+                <span className="font-title text-heading mr-auto truncate text-xl tracking-wide">
+                  {isExplaining ? explanation.label : current.title}
+                </span>
+                {IS_SPEECH_SUPPORTED && (
+                  <button
+                    type="button"
+                    onClick={toggleMuted}
+                    aria-label={
+                      isMuted ? 'Unmute quivr-mannetje' : 'Mute quivr-mannetje'
+                    }
+                    aria-pressed={isMuted}
+                    className="hover:bg-cardbg rounded px-1 text-base"
+                  >
+                    {isMuted ? '🔇' : '🔊'}
+                  </button>
+                )}
+              </div>
+              <p
+                aria-live="polite"
+                className="break-words"
+              >
+                {explanation.status === 'idle' && current.text}
+                {explanation.status === 'loading' && (
+                  <span className="text-muted animate-pulse">
+                    Let me take a look…
+                  </span>
+                )}
+                {explanation.status === 'done' && explanation.text}
+                {explanation.status === 'error' && (
+                  <span className="text-danger-text">
+                    {explanation.message}
+                  </span>
+                )}
+              </p>
+              {shouldShowHint && (
+                <button
+                  type="button"
+                  onClick={() => setRetryCount(count => count + 1)}
+                  className="text-muted mt-2 text-xs underline"
+                >
+                  🔊 Click to hear me
+                </button>
+              )}
+              {isExplaining ? (
+                <div className="mt-3 flex items-center justify-end gap-2">
+                  <button
+                    ref={nextRef}
+                    type="button"
+                    onClick={close}
+                    aria-label="Close the explanation"
+                    className="bg-main text-sidenav-blue rounded-md px-3 py-1 text-xs font-bold"
+                  >
+                    Thanks
+                  </button>
+                </div>
+              ) : (
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="text-muted mr-auto text-xs">
+                    {step + 1} / {STEPS.length}
+                  </span>
+                  {!isLast && (
+                    <button
+                      type="button"
+                      onClick={close}
+                      aria-label="Skip the quivr-mannetje tour"
+                      className="text-muted hover:text-heading rounded px-2 py-1 text-xs"
+                    >
+                      Skip
+                    </button>
+                  )}
+                  <button
+                    ref={nextRef}
+                    type="button"
+                    onClick={isLast ? close : () => setStep(step + 1)}
+                    aria-label={
+                      isLast ? 'Finish the quivr-mannetje tour' : 'Next tip'
+                    }
+                    className="bg-main text-sidenav-blue rounded-md px-3 py-1 text-xs font-bold"
+                  >
+                    {isLast ? 'Done' : 'Next'}
+                  </button>
+                </div>
+              )}
+              <span
+                aria-hidden="true"
+                className="quivr-mannetje-tail border-schedule-border-grey bg-surface absolute h-3 w-3 border-r border-b"
+              />
+            </div>
+          </div>
+        )}
       </div>
       <div
         data-quivr-mannetje=""
@@ -702,107 +732,6 @@ export function QuivrMannetje({ model }: { model: string }) {
           <p className="bg-main text-sidenav-blue pointer-events-auto rounded-full px-3 py-1 text-xs font-bold shadow-lg">
             Click something or select text. Esc to stop.
           </p>
-        )}
-        {isOpen && current && (
-          <div
-            ref={bubbleRef}
-            role="dialog"
-            aria-label={
-              isExplaining
-                ? 'quivr-mannetje explanation'
-                : 'quivr-mannetje tour'
-            }
-            onPointerEnter={() => setIsHovering(true)}
-            onPointerLeave={() => setIsHovering(false)}
-            className="quivr-mannetje-bubble border-schedule-border-grey bg-surface text-main-text pointer-events-auto relative w-72 max-w-full rounded-xl border p-3 text-sm shadow-lg"
-          >
-            <div className="mb-1 flex items-center gap-2">
-              <span className="font-title text-heading mr-auto truncate text-xl tracking-wide">
-                {isExplaining ? explanation.label : current.title}
-              </span>
-              {IS_SPEECH_SUPPORTED && (
-                <button
-                  type="button"
-                  onClick={toggleMuted}
-                  aria-label={
-                    isMuted ? 'Unmute quivr-mannetje' : 'Mute quivr-mannetje'
-                  }
-                  aria-pressed={isMuted}
-                  className="hover:bg-cardbg rounded px-1 text-base"
-                >
-                  {isMuted ? '🔇' : '🔊'}
-                </button>
-              )}
-            </div>
-            <p
-              aria-live="polite"
-              className="break-words"
-            >
-              {explanation.status === 'idle' && current.text}
-              {explanation.status === 'loading' && (
-                <span className="text-muted animate-pulse">
-                  Let me take a look…
-                </span>
-              )}
-              {explanation.status === 'done' && explanation.text}
-              {explanation.status === 'error' && (
-                <span className="text-danger-text">{explanation.message}</span>
-              )}
-            </p>
-            {shouldShowHint && (
-              <button
-                type="button"
-                onClick={() => setRetryCount(count => count + 1)}
-                className="text-muted mt-2 text-xs underline"
-              >
-                🔊 Click to hear me
-              </button>
-            )}
-            {isExplaining ? (
-              <div className="mt-3 flex items-center justify-end gap-2">
-                <button
-                  ref={nextRef}
-                  type="button"
-                  onClick={close}
-                  aria-label="Close the explanation"
-                  className="bg-main text-sidenav-blue rounded-md px-3 py-1 text-xs font-bold"
-                >
-                  Thanks
-                </button>
-              </div>
-            ) : (
-              <div className="mt-3 flex items-center gap-2">
-                <span className="text-muted mr-auto text-xs">
-                  {step + 1} / {STEPS.length}
-                </span>
-                {!isLast && (
-                  <button
-                    type="button"
-                    onClick={close}
-                    aria-label="Skip the quivr-mannetje tour"
-                    className="text-muted hover:text-heading rounded px-2 py-1 text-xs"
-                  >
-                    Skip
-                  </button>
-                )}
-                <button
-                  ref={nextRef}
-                  type="button"
-                  onClick={isLast ? close : () => setStep(step + 1)}
-                  aria-label={
-                    isLast ? 'Finish the quivr-mannetje tour' : 'Next tip'
-                  }
-                  className="bg-main text-sidenav-blue rounded-md px-3 py-1 text-xs font-bold"
-                >
-                  {isLast ? 'Done' : 'Next'}
-                </button>
-              </div>
-            )}
-            <span
-              aria-hidden="true"
-              className="border-schedule-border-grey bg-surface absolute right-[22px] -bottom-1.5 h-3 w-3 rotate-45 border-r border-b"
-            />
-          </div>
         )}
         <div className="flex items-end gap-2">
           <button
@@ -828,7 +757,7 @@ export function QuivrMannetje({ model }: { model: string }) {
           >
             ?
           </button>
-          {/* Home spot: the sprite walks back here when the tour opens */}
+          {/* Home spot: where he starts, next to the buttons */}
           <div
             ref={homeRef}
             aria-hidden="true"
