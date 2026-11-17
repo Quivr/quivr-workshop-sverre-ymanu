@@ -1,25 +1,10 @@
 import { useEffect, useState } from 'react'
 
 import { ToolCallCard } from '../cards/ToolCallCard'
-
-type Trace = {
-  id: string
-  startedAt: string
-  model: string
-  messages: { role: string; content: unknown }[]
-  toolCalls: {
-    toolCallId: string
-    toolName: string
-    input: unknown
-    output?: string
-    error?: string
-    durationMs: number
-  }[]
-  text: string
-  error?: string
-  usage?: { inputTokens?: number; outputTokens?: number }
-  durationMs: number
-}
+import { estimateCost, formatCost } from '../traces/cost'
+import type { Trace } from '../traces/types'
+import { TraceCompare } from './TraceCompare'
+import { TraceTimeline } from './TraceTimeline'
 
 const lastQuestion = (trace: Trace) => {
   const content = trace.messages.filter(m => m.role === 'user').at(-1)?.content
@@ -38,6 +23,7 @@ const parse = (text: string | undefined) => {
 export function TracesPanel() {
   const [traces, setTraces] = useState<Trace[] | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [selected, setSelected] = useState<string[]>([])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -56,24 +42,51 @@ export function TracesPanel() {
   if (traces.length === 0)
     return <p>No runs yet. Ask something in the chat first.</p>
 
+  const toggleSelected = (id: string) =>
+    setSelected(current =>
+      current.includes(id)
+        ? current.filter(other => other !== id)
+        : [...current, id].slice(-2)
+    )
+  const [a, b] = selected.map(id => traces.find(trace => trace.id === id))
+
   return (
     <div className="space-y-2">
+      <p className="text-sidenav-secondary text-xs">
+        Tick two runs to compare them. Costs are estimates from a small price
+        table.
+      </p>
+      {a && b && (
+        <TraceCompare
+          a={a}
+          b={b}
+        />
+      )}
       {traces.map(trace => (
         <details
           key={trace.id}
           className="bg-surface rounded-md shadow-sm"
         >
           <summary className="cursor-pointer px-3 py-2 text-sm">
+            <input
+              type="checkbox"
+              className="mr-2 align-middle"
+              aria-label="Select for comparison"
+              checked={selected.includes(trace.id)}
+              onClick={event => event.stopPropagation()}
+              onChange={() => toggleSelected(trace.id)}
+            />
             <span className="font-bold">{lastQuestion(trace)}</span>
             <span className={trace.error ? 'text-danger' : 'text-muted'}>
               {' '}
               · {new Date(trace.startedAt).toLocaleTimeString()} · {trace.model}{' '}
               · {trace.toolCalls.length} tools · {trace.durationMs} ms
               {trace.usage &&
-                ` · ${trace.usage.inputTokens ?? 0}→${trace.usage.outputTokens ?? 0} tokens`}
+                ` · ${trace.usage.inputTokens ?? 0}→${trace.usage.outputTokens ?? 0} tokens · ${formatCost(estimateCost(trace.model, trace.usage))}`}
             </span>
           </summary>
           <div className="border-schedule-border-grey space-y-2 border-t p-3">
+            <TraceTimeline trace={trace} />
             {trace.toolCalls.map(call => (
               <ToolCallCard
                 key={call.toolCallId}

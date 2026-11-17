@@ -21,7 +21,17 @@ export type ToolCallTrace = {
   input: unknown
   output?: string
   error?: string
+  /** Milliseconds from the start of the run; missing in older traces. */
+  startOffsetMs?: number
   durationMs: number
+}
+
+/** One LLM call within a run. Missing in older traces. */
+export type StepTrace = {
+  startOffsetMs: number
+  durationMs: number
+  finishReason?: string
+  usage?: { inputTokens?: number; outputTokens?: number }
 }
 
 export type Trace = {
@@ -30,6 +40,7 @@ export type Trace = {
   model: string
   messages: ModelMessage[]
   toolCalls: ToolCallTrace[]
+  steps?: StepTrace[]
   text: string
   error?: string
   usage?: { inputTokens?: number; outputTokens?: number }
@@ -56,11 +67,26 @@ export const startTrace = (model: string, messages: ModelMessage[]) => {
     model,
     messages,
     toolCalls: [],
+    steps: [],
     text: '',
     durationMs: 0,
   }
 
+  let stepStarted = started
+
   const record = (part: TextStreamPart<ToolSet>) => {
+    if (part.type === 'start-step') stepStarted = Date.now()
+    if (part.type === 'finish-step') {
+      trace.steps?.push({
+        startOffsetMs: stepStarted - started,
+        durationMs: Date.now() - stepStarted,
+        finishReason: part.finishReason,
+        usage: {
+          inputTokens: part.usage.inputTokens,
+          outputTokens: part.usage.outputTokens,
+        },
+      })
+    }
     if (part.type === 'text-delta') trace.text += part.text
     if (part.type === 'tool-call') toolStarts.set(part.toolCallId, Date.now())
     if (part.type === 'tool-result' || part.type === 'tool-error') {
@@ -69,12 +95,14 @@ export const startTrace = (model: string, messages: ModelMessage[]) => {
         part.type === 'tool-error'
           ? String(part.error)
           : toolOutputText(part.output)
+      const toolStarted = toolStarts.get(part.toolCallId) ?? started
       const call: ToolCallTrace = {
         toolCallId: part.toolCallId,
         toolName: part.toolName,
         input: part.input,
         ...(failed ? { error: text } : { output: text }),
-        durationMs: Date.now() - (toolStarts.get(part.toolCallId) ?? started),
+        startOffsetMs: toolStarted - started,
+        durationMs: Date.now() - toolStarted,
       }
       trace.toolCalls.push(call)
       logToolCall(call)
