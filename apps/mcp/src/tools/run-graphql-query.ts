@@ -30,6 +30,8 @@ export const runGraphqlQuery = defineTool({
       .optional()
       .describe('Values for the query variables, as a JSON object.'),
   },
+  // partialJson is one long string, so the default per-string cap would cut it short
+  maxStringLength: MAX_RESPONSE_CHARS + 1,
   run: async ({ query, variables }, quivr) => {
     parseSingleQuery(query)
     const data = await quivr.rawQuery(query, variables ?? {})
