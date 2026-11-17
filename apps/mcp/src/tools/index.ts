@@ -2,6 +2,7 @@ import type { Config } from '../config.js'
 import type { ToolDefinition } from './define-tool.js'
 import { findDish } from './find-dish.js'
 import { findCommonFreeSlots } from './find-common-free-slots.js'
+import { getEvents } from './get-events.js'
 import { getFriends } from './get-friends.js'
 import { draftInvite } from './draft-invite.js'
 import { getLibraryOccupancy } from './get-library-occupancy.js'
@@ -24,6 +25,7 @@ export const tools = [
   getFriends,
   findCommonFreeSlots,
   getNews,
+  getEvents,
   getStudentBars,
   getTodayOverview,
   draftInvite,

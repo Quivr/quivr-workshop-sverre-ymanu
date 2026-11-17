@@ -1,0 +1,115 @@
+{
+  "{\"first\":10}": {
+    "eventSpecificationsFeed": {
+      "nodes": [
+        {
+          "id": "1",
+          "kind": "DATE",
+          "title": "This week",
+          "eventSpecifications": {
+            "nodes": [
+              {
+                "id": "e3",
+                "title": "Fake concert: Example Brass Night",
+                "description": "<p>An evening of <b>brass band</b> music by the Example University Brass Band. Doors open at 19:30.</p>",
+                "startTime": "2026-11-19T20:00:00+01:00",
+                "endTime": "2026-11-19T22:30:00+01:00",
+                "url": "https://example.invalid/events/e3",
+                "locations": [
+                  { "name": "Example Concert Hall", "address": "Example Street 1, Exampleville" }
+                ],
+                "companies": [{ "name": "Example Music Society" }],
+                "registration": {
+                  "soldOut": false,
+                  "ticketKinds": [
+                    { "name": "Student", "priceCents": 800, "soldOut": false },
+                    { "name": "Regular", "priceCents": 1200, "soldOut": false }
+                  ]
+                }
+              },
+              {
+                "id": "e1",
+                "title": "Fake party: Example Cantus",
+                "description": "<p>The yearly Example Cantus with songs, beer and good company.</p><p>Bring your songbook &amp; your voice!</p>",
+                "startTime": "2026-11-18T21:00:00+01:00",
+                "endTime": "2026-11-19T02:00:00+01:00",
+                "url": "https://example.invalid/events/e1",
+                "locations": [{ "name": "Example Student House", "address": null }],
+                "companies": [{ "name": "Example Student Society" }],
+                "registration": {
+                  "soldOut": false,
+                  "ticketKinds": [
+                    { "name": "Entry", "priceCents": 500, "soldOut": false }
+                  ]
+                }
+              },
+              {
+                "id": "e0",
+                "title": "Fake talk: Last week's career afternoon",
+                "description": "A career talk that already took place.",
+                "startTime": "2026-11-14T14:00:00+01:00",
+                "endTime": "2026-11-14T16:00:00+01:00",
+                "url": null,
+                "locations": [{ "name": "Example Auditorium A", "address": null }],
+                "companies": [{ "name": "Example Career Service" }],
+                "registration": null
+              },
+              {
+                "id": "e2",
+                "title": "Fake workshop: Free pottery for beginners",
+                "description": "Try pottery for the first time. All materials are provided.",
+                "startTime": "2026-11-17T18:00:00+01:00",
+                "endTime": "2026-11-17T20:00:00+01:00",
+                "url": "https://example.invalid/events/e2",
+                "locations": [{ "name": "Example Art Studio", "address": null }],
+                "companies": [{ "name": "Example Arts Circle" }],
+                "registration": {
+                  "soldOut": true,
+                  "ticketKinds": [
+                    { "name": "Participant", "priceCents": 0, "soldOut": true }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "id": "2",
+          "kind": "POPULAR",
+          "title": "Popular",
+          "eventSpecifications": {
+            "nodes": [
+              {
+                "id": "e1",
+                "title": "Fake party: Example Cantus",
+                "description": "<p>The yearly Example Cantus with songs, beer and good company.</p><p>Bring your songbook &amp; your voice!</p>",
+                "startTime": "2026-11-18T21:00:00+01:00",
+                "endTime": "2026-11-19T02:00:00+01:00",
+                "url": "https://example.invalid/events/e1",
+                "locations": [{ "name": "Example Student House", "address": null }],
+                "companies": [{ "name": "Example Student Society" }],
+                "registration": {
+                  "soldOut": false,
+                  "ticketKinds": [
+                    { "name": "Entry", "priceCents": 500, "soldOut": false }
+                  ]
+                }
+              },
+              {
+                "id": "e4",
+                "title": "Fake party: Example Winter Ball",
+                "description": "<div>Dress up for the <em>Example Winter Ball</em>. A night of dancing with a live DJ and a photo booth. Tickets are limited so be quick, because last year the ball sold out within a day and many people were disappointed. See you on the dance floor!</div>",
+                "startTime": "2026-11-28T20:00:00+01:00",
+                "endTime": "2026-11-29T03:00:00+01:00",
+                "url": "https://example.invalid/events/e4",
+                "locations": [],
+                "companies": [],
+                "registration": null
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

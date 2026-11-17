@@ -14,6 +14,7 @@ import type {
   CreateEventMutation,
   EventInput,
   EventSchedulesQuery,
+  EventsQuery,
   FriendListQuery,
   FriendSchedulesQuery,
   FakbarsQuery,
@@ -96,6 +97,10 @@ export class QuivrClient {
 
   getNewsTopics(): Promise<NewsTopicsQuery> {
     return this.request('NewsTopics', {})
+  }
+
+  getEvents(first: number): Promise<EventsQuery> {
+    return this.request('Events', { first })
   }
 
   getStudentBars(onlyShowOpen: boolean): Promise<FakbarsQuery> {

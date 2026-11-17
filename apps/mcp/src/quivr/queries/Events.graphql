@@ -1,0 +1,34 @@
+query Events($first: Int!) {
+  eventSpecificationsFeed(first: $first) {
+    nodes {
+      id
+      kind
+      title
+      eventSpecifications(first: 20) {
+        nodes {
+          id
+          title
+          description
+          startTime
+          endTime
+          url
+          locations {
+            name
+            address
+          }
+          companies {
+            name
+          }
+          registration {
+            soldOut
+            ticketKinds {
+              name
+              priceCents
+              soldOut
+            }
+          }
+        }
+      }
+    }
+  }
+}
