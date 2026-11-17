@@ -5,6 +5,8 @@ import { findDish } from './find-dish.js'
 import { getLibraryOccupancy } from './get-library-occupancy.js'
 import { getMenu } from './get-menu.js'
 import { getMySchedule } from './get-my-schedule.js'
+import { findCommonFreeSlots } from './find-common-free-slots.js'
+import { getFriends } from './get-friends.js'
 
 const fakeQuivr = (overrides: Partial<QuivrClient>) =>
   overrides as unknown as QuivrClient
@@ -249,5 +251,102 @@ describe('find_dish', () => {
     )
 
     expect(result).toMatchObject({ totalMatches: 0, matches: [] })
+  })
+})
+
+describe('get_friends', () => {
+  it('returns id and names', async () => {
+    const quivr = fakeQuivr({
+      getFriends: async () =>
+        ({
+          friendList: [
+            { id: '1', firstName: 'Alex', lastName: 'Example', extra: 'x' },
+          ],
+        }) as never,
+    })
+
+    expect(await getFriends.run({}, quivr)).toEqual([
+      { id: '1', firstName: 'Alex', lastName: 'Example' },
+    ])
+  })
+})
+
+describe('find_common_free_slots', () => {
+  const friendList = [
+    { id: '1', firstName: 'Alex', lastName: 'Example' },
+    { id: '2', firstName: 'Sam', lastName: 'Sample' },
+  ]
+  const item = (startTime: string, endTime: string, allDay = false) => ({
+    id: startTime,
+    title: 'Secret title',
+    startTime,
+    endTime,
+    allDay,
+  })
+  const schedules: Record<string, object[]> = {
+    '1': [item('2026-11-17T09:00:00+01:00', '2026-11-17T12:00:00+01:00')],
+    '2': [],
+  }
+  const quivr = fakeQuivr({
+    getFriends: async () => ({ friendList }) as never,
+    getMySchedule: async () =>
+      ({
+        scheduleItems: {
+          scheduleItems: [
+            item('2026-11-17T11:00:00+01:00', '2026-11-17T14:00:00+01:00'),
+          ],
+        },
+      }) as never,
+    getFriendSchedules: async (ids: string[]) =>
+      ({
+        friendSchedules: ids.map(id => ({
+          friendId: id,
+          scheduleItems: schedules[id] ?? [],
+        })),
+      }) as never,
+  })
+
+  it('finds the gaps everyone shares and only returns slots and first names', async () => {
+    const result = await findCommonFreeSlots.run(
+      { friendIds: ['2', '1'], date: '2026-11-17', minMinutes: 60 },
+      quivr
+    )
+
+    expect(result).toMatchObject({
+      participants: ['you', 'Alex', 'Sam'],
+      slots: [
+        {
+          start: '2026-11-17T08:00:00+01:00',
+          end: '2026-11-17T09:00:00+01:00',
+          minutes: 60,
+        },
+        {
+          start: '2026-11-17T14:00:00+01:00',
+          end: '2026-11-17T20:00:00+01:00',
+          minutes: 360,
+        },
+      ],
+      sharedNothing: ['Sam'],
+    })
+    expect(JSON.stringify(result)).not.toMatch(/Secret|Example|Sample/)
+  })
+
+  it('treats a friend all-day item as busy for the whole day', async () => {
+    schedules['2'] = [
+      item('2026-11-17T00:00:00+01:00', '2026-11-18T00:00:00+01:00', true),
+    ]
+    const result = await findCommonFreeSlots.run(
+      { friendIds: ['2'], date: '2026-11-17' },
+      quivr
+    )
+    schedules['2'] = []
+
+    expect(result).toMatchObject({ slots: [], sharedNothing: [] })
+  })
+
+  it('refuses ids that are not friends', async () => {
+    await expect(
+      findCommonFreeSlots.run({ friendIds: ['99'], date: '2026-11-17' }, quivr)
+    ).rejects.toThrow(/Unknown friend id.*99/)
   })
 })

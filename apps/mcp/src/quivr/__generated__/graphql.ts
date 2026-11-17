@@ -32,6 +32,19 @@ export type TimeRangeInput = {
   startTime: string;
 };
 
+export type FriendListQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type FriendListQuery = { friendList: Array<{ id: string, firstName: string, lastName: string }> };
+
+export type FriendSchedulesQueryVariables = Exact<{
+  friendIds: Array<string | number> | string | number;
+  timeRange: TimeRangeInput;
+}>;
+
+
+export type FriendSchedulesQuery = { friendSchedules: Array<{ friendId: string, scheduleItems: Array<{ id: string, startTime: string, endTime: string, allDay: boolean }> }> };
+
 export type LibrariesQueryVariables = Exact<{ [key: string]: never; }>;
 
 

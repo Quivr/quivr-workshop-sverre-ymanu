@@ -35,9 +35,11 @@ const dates = datesBetween(
 )
 
 const { restaurants } = await quivr.listRestaurants()
+const { friendList } = await quivr.getFriends()
 await quivr.getLibraries()
 for (const date of dates) {
   await quivr.getMySchedule(date)
+  await Promise.all(friendList.map(f => quivr.getFriendSchedules([f.id], date)))
   await Promise.all(restaurants.map(r => quivr.getMenu(r.id, date)))
 }
 

@@ -1,0 +1,11 @@
+query FriendSchedules($friendIds: [ID!]!, $timeRange: TimeRangeInput!) {
+  friendSchedules(friendIds: $friendIds, timeRange: $timeRange) {
+    friendId
+    scheduleItems {
+      id
+      startTime
+      endTime
+      allDay
+    }
+  }
+}
