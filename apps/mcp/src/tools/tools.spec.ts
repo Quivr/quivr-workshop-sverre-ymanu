@@ -9,6 +9,7 @@ import { findCommonFreeSlots } from './find-common-free-slots.js'
 import { getFriends } from './get-friends.js'
 import { getNews } from './get-news.js'
 import { getStudentBars } from './get-student-bars.js'
+import { getTodayOverview } from './get-today-overview.js'
 
 const fakeQuivr = (overrides: Partial<QuivrClient>) =>
   overrides as unknown as QuivrClient
@@ -528,5 +529,159 @@ describe('get_student_bars', () => {
 
     expect(bars[0]?.description).toHaveLength(201)
     expect(bars[0]?.busyness).toBe('very busy')
+  })
+})
+
+describe('get_today_overview', () => {
+  const lesson = (title: string, start: string, end: string, loc: object) => ({
+    __typename: 'Lesson',
+    title,
+    startTime: `2026-11-17T${start}:00+01:00`,
+    endTime: `2026-11-17T${end}:00+01:00`,
+    locations: [loc],
+    teachers: [],
+  })
+  const menu = (id: string, name: string, open: boolean) => ({
+    restaurants: [
+      {
+        id,
+        name,
+        openingHours: open
+          ? [
+              {
+                day: 'x',
+                data: [
+                  {
+                    openFrom: '2026-11-17T10:00:00Z',
+                    openUntil: '2026-11-17T13:00:00Z',
+                  },
+                ],
+              },
+            ]
+          : [],
+        dishes: [
+          {
+            name: 'Lasagne. ',
+            mealCategory: 'WARM_BUFFET',
+            prices: [4.6],
+            vegetarian: false,
+            vegan: true,
+            allergens: ['GLUTEN'],
+          },
+        ],
+      },
+    ],
+  })
+  const restaurants = [
+    {
+      id: '1',
+      name: 'Alma 1',
+      location: {
+        address: 'Tiensestraat 115 - 3000 Leuven',
+        latitude: 50.877,
+        longitude: 4.7,
+      },
+    },
+    {
+      id: '2',
+      name: 'Alma 2',
+      location: {
+        address: 'Celestijnenlaan 200 P - 3001 Heverlee',
+        latitude: 50.86,
+        longitude: 4.68,
+      },
+    },
+  ]
+  const build = (items: object[], open: Record<string, boolean>) =>
+    fakeQuivr({
+      getMySchedule: async () =>
+        ({ scheduleItems: { scheduleItems: items } }) as never,
+      listRestaurants: async () => ({ restaurants }) as never,
+      getMenu: async (id: string) =>
+        menu(id, `Alma ${id}`, open[id] ?? false) as never,
+    })
+
+  it('highlights the next class and returns the closest open menu', async () => {
+    const quivr = build(
+      [
+        lesson('Databases', '09:00', '11:00', {
+          name: 'Aula',
+          latitude: 50.8605,
+          longitude: 4.6805,
+        }),
+        lesson('Algebra', '14:00', '16:00', {
+          name: 'Aula',
+          latitude: 50.8605,
+          longitude: 4.6805,
+        }),
+      ],
+      { '1': true, '2': true }
+    )
+
+    const result = await getTodayOverview.run(
+      { date: '2026-11-17', time: '11:30' },
+      quivr
+    )
+
+    expect(result).toMatchObject({
+      nextClass: { title: 'Algebra', status: 'upcoming' },
+      schedule: [
+        { title: 'Databases', next: undefined },
+        { title: 'Algebra', next: true },
+      ],
+      match: { rule: 'distance' },
+      restaurant: {
+        name: 'Alma 2',
+        openingHours: ['11:00-14:00'],
+        dishes: [
+          { name: 'Lasagne', price: 4.6, vegetarian: true, vegan: true },
+        ],
+      },
+    })
+  })
+
+  it('skips closed restaurants when picking the closest one', async () => {
+    const quivr = build(
+      [
+        lesson('Algebra', '14:00', '16:00', {
+          name: 'Aula',
+          latitude: 50.8605,
+          longitude: 4.6805,
+        }),
+      ],
+      { '1': true, '2': false }
+    )
+
+    const result = await getTodayOverview.run({ date: '2026-11-17' }, quivr)
+
+    expect(result).toMatchObject({ restaurant: { name: 'Alma 1' } })
+  })
+
+  it('has no next class on a day without classes and uses the first open restaurant', async () => {
+    const quivr = build([], { '2': true })
+
+    const result = await getTodayOverview.run({ date: '2026-11-17' }, quivr)
+
+    expect(result).toMatchObject({
+      schedule: [],
+      nextClass: null,
+      match: { rule: 'first-open' },
+      restaurant: { name: 'Alma 2' },
+    })
+  })
+
+  it('returns no restaurant when none is open', async () => {
+    const quivr = build(
+      [lesson('Algebra', '14:00', '16:00', { name: 'V1.12' })],
+      {}
+    )
+
+    const result = await getTodayOverview.run({ date: '2026-11-17' }, quivr)
+
+    expect(result).toMatchObject({
+      nextClass: { title: 'Algebra' },
+      restaurant: null,
+      match: { rule: 'none' },
+    })
   })
 })

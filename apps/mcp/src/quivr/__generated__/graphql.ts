@@ -77,10 +77,10 @@ export type MyScheduleQueryVariables = Exact<{
 
 
 export type MyScheduleQuery = { scheduleItems: { scheduleItems: Array<
-      | { __typename: 'Event', id: string, title: string, startTime: string, endTime: string, locations: Array<{ name: string | null, address: string | null }> | null }
-      | { __typename: 'EventSpecificationInstance', id: string, title: string, startTime: string, endTime: string, locations: Array<{ name: string | null, address: string | null }> | null }
-      | { __typename: 'Lesson', id: string, title: string, startTime: string, endTime: string, teachers: Array<{ name: string }>, locations: Array<{ name: string | null, address: string | null }> | null }
-      | { __typename: 'RepeatedEventInstance', id: string, title: string, startTime: string, endTime: string, locations: Array<{ name: string | null, address: string | null }> | null }
+      | { __typename: 'Event', id: string, title: string, startTime: string, endTime: string, locations: Array<{ name: string | null, address: string | null, latitude: number | null, longitude: number | null }> | null }
+      | { __typename: 'EventSpecificationInstance', id: string, title: string, startTime: string, endTime: string, locations: Array<{ name: string | null, address: string | null, latitude: number | null, longitude: number | null }> | null }
+      | { __typename: 'Lesson', id: string, title: string, startTime: string, endTime: string, teachers: Array<{ name: string }>, locations: Array<{ name: string | null, address: string | null, latitude: number | null, longitude: number | null }> | null }
+      | { __typename: 'RepeatedEventInstance', id: string, title: string, startTime: string, endTime: string, locations: Array<{ name: string | null, address: string | null, latitude: number | null, longitude: number | null }> | null }
     > } };
 
 export type NewsQueryVariables = Exact<{
@@ -99,4 +99,4 @@ export type NewsTopicsQuery = { newsArticlesTopics: Array<string> };
 export type RestaurantsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type RestaurantsQuery = { restaurants: Array<{ id: string, name: string, location: { name: string | null, address: string | null } | null }> };
+export type RestaurantsQuery = { restaurants: Array<{ id: string, name: string, location: { name: string | null, address: string | null, latitude: number | null, longitude: number | null } | null }> };

@@ -7,6 +7,7 @@ import { LibraryCard } from './LibraryCard'
 import { MenuCard } from './MenuCard'
 import { NewsCard } from './NewsCard'
 import { ScheduleCard } from './ScheduleCard'
+import { TodayCard } from './TodayCard'
 import type { CardProps } from './types'
 
 /** Tool name → card. Tools without a card use ToolCallCard. Add new cards here. */
@@ -18,4 +19,5 @@ export const cards: Record<string, ComponentType<CardProps>> = {
   get_news: NewsCard,
   get_student_bars: BarsCard,
   get_library_occupancy: LibraryCard,
+  get_today_overview: TodayCard,
 }
