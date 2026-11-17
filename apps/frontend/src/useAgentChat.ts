@@ -2,6 +2,8 @@ import { HttpAgent, type AgentSubscriber } from '@ag-ui/client'
 import type { Message } from '@ag-ui/core'
 import { useRef, useState } from 'react'
 
+import { withoutUnansweredToolCalls } from './chatHelpers'
+
 const TOOL_TIMING_EVENT = 'tool_timing'
 
 const newAgent = () => new HttpAgent({ url: '/api/agent' })
@@ -39,9 +41,15 @@ export const useAgentChat = () => {
     } catch (runError) {
       setError(runError instanceof Error ? runError.message : String(runError))
     } finally {
-      setIsRunning(false)
+      if (agentRef.current === agent) {
+        agent.messages = withoutUnansweredToolCalls(agent.messages)
+        setMessages([...agent.messages])
+        setIsRunning(false)
+      }
     }
   }
+
+  const stop = () => agentRef.current.abortRun()
 
   const reset = () => {
     agentRef.current.abortRun()
@@ -52,5 +60,5 @@ export const useAgentChat = () => {
     setIsRunning(false)
   }
 
-  return { messages, isRunning, error, durations, send, reset }
+  return { messages, isRunning, error, durations, send, stop, reset }
 }
