@@ -140,7 +140,82 @@ body {
   animation: quivr-mannetje-bubble 250ms ease-out 350ms both;
 }
 
+@keyframes quivr-mannetje-waddle {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-6deg);
+  }
+  50% {
+    transform: translateY(-3px) rotate(6deg);
+  }
+}
+
+@keyframes quivr-mannetje-step {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes quivr-mannetje-hop {
+  0%,
+  100% {
+    transform: translateY(0) scale(1.05, 0.92);
+  }
+  40% {
+    transform: translateY(-14px) scale(0.95, 1.08);
+  }
+}
+
+@keyframes quivr-mannetje-spin {
+  from {
+    transform: translateY(0) rotate(0deg);
+  }
+  40% {
+    transform: translateY(-12px) rotate(180deg);
+  }
+  to {
+    transform: translateY(0) rotate(360deg);
+  }
+}
+
+.quivr-mannetje[data-mode='walk'] .quivr-mannetje-bob {
+  animation: quivr-mannetje-waddle 440ms ease-in-out infinite;
+}
+
+.quivr-mannetje[data-mode='hop'] .quivr-mannetje-bob {
+  animation: quivr-mannetje-hop 650ms ease-in-out infinite;
+}
+
+.quivr-mannetje[data-mode='spin'] .quivr-mannetje-bob {
+  animation: quivr-mannetje-spin 700ms ease-in-out 1;
+}
+
+.quivr-mannetje-foot {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.quivr-mannetje[data-mode='walk'] .quivr-mannetje-foot-left {
+  animation: quivr-mannetje-step 440ms ease-in-out infinite;
+}
+
+.quivr-mannetje[data-mode='walk'] .quivr-mannetje-foot-right {
+  animation: quivr-mannetje-step 440ms ease-in-out -220ms infinite;
+}
+
+/* Eyes look towards the cursor: --look-x/--look-y are set from the component */
+.quivr-mannetje-look {
+  transform: translate(var(--look-x, 0px), var(--look-y, 0px));
+  transition: transform 120ms ease-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .quivr-mannetje .quivr-mannetje-bob,
+  .quivr-mannetje .quivr-mannetje-foot,
   .quivr-mannetje-pop,
   .quivr-mannetje-bob,
   .quivr-mannetje-eye,
