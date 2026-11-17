@@ -1,15 +1,19 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 
+import { loadConfig, type Config } from './config.js'
 import type { QuivrClient } from './quivr/quivr-client.js'
-import { tools } from './tools/index.js'
+import { enabledTools } from './tools/index.js'
 
 const errorMessage = (error: unknown) =>
   error instanceof Error ? error.message : String(error)
 
-export const createMcpServer = (quivr: QuivrClient): McpServer => {
+export const createMcpServer = (
+  quivr: QuivrClient,
+  config: Pick<Config, 'enableGenericGraphql'> = loadConfig()
+): McpServer => {
   const server = new McpServer({ name: 'quivr', version: '1.0.0' })
 
-  for (const tool of tools) {
+  for (const tool of enabledTools(config)) {
     server.registerTool(
       tool.name,
       { description: tool.description, inputSchema: tool.inputSchema },

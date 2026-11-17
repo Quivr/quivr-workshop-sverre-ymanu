@@ -19,6 +19,8 @@ export type RunAgentOptions = {
   /** Overrides the clock, e.g. in evals. */
   now?: Date
   mcpUrl?: string
+  /** Expose only these MCP tools to the model, e.g. in evals. Default: all. */
+  onlyTools?: string[]
   abortSignal?: AbortSignal
 }
 
@@ -57,7 +59,17 @@ export async function* runAgent(
     mcp = await createMCPClient({
       transport: { type: 'http', url: options.mcpUrl ?? config.mcpUrl },
     })
-    const tools = withTimeout(await mcp.tools(), config.toolTimeoutMs)
+    const allTools = await mcp.tools()
+    const tools = withTimeout(
+      options.onlyTools
+        ? Object.fromEntries(
+            Object.entries(allTools).filter(([name]) =>
+              options.onlyTools?.includes(name)
+            )
+          )
+        : allTools,
+      config.toolTimeoutMs
+    )
 
     const result = streamText({
       model,

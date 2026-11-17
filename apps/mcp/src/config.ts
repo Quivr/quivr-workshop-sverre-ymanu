@@ -16,6 +16,7 @@ export type Config = {
   mode: QuivrMode
   readOnly: boolean
   baseUrl: string
+  enableGenericGraphql: boolean
 }
 
 export const loadConfig = (): Config => ({
@@ -23,6 +24,7 @@ export const loadConfig = (): Config => ({
   mode: process.env.QUIVR_MODE === 'fixtures' ? 'fixtures' : 'live',
   readOnly: process.env.QUIVR_READ_ONLY !== 'false',
   baseUrl: process.env.QUIVR_BASE_URL ?? 'https://rails-beta.quivr.be',
+  enableGenericGraphql: process.env.ENABLE_GENERIC_GRAPHQL === 'true',
 })
 
 /** Auth headers to send with every Quivr request. */

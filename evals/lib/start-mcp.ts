@@ -20,6 +20,8 @@ export default async function startMcp() {
     env: {
       ...process.env,
       QUIVR_MODE: 'fixtures',
+      // Opt-in tool: on only when the eval run asks for it, not via .env.
+      ENABLE_GENERIC_GRAPHQL: process.env.ENABLE_GENERIC_GRAPHQL ?? 'false',
       MCP_PORT: String(EVAL_MCP_PORT),
     },
     stdio: 'ignore',
