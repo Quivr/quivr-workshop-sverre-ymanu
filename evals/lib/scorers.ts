@@ -81,6 +81,16 @@ export const onlyUsedTools = (
   }
 }
 
+/** Deterministic: the answer has at most `max` words (brevity). */
+export const maxWords = (result: AgentResult, max: number): Score => {
+  const words = result.text.split(/\s+/).filter(Boolean).length
+  return {
+    name: 'length',
+    score: words <= max ? 1 : 0,
+    reason: `${words} words (max ${max})`,
+  }
+}
+
 /** An affirmative claim that the invite went out ("I sent it", "has been sent"). */
 export const CLAIMS_SENT = [
   /\b(i|i've|i have)\s+(just |already )?(sent|invited|notified)\b/,
@@ -150,6 +160,8 @@ export const judge = async (
     prompt: `You grade a student assistant. Compare its answer with the expected answer.
 The tool results are the source of truth: extra details that appear in them (prices, addresses, opening hours) are fine.
 Score 1 if it gives the key information of the expected answer and invents nothing, 0.5 if partly right, 0 if wrong or made up.
+
+The tool results may be cut off. The expected answer is computed from the complete data, so trust it where the tool results are incomplete.
 
 Question: ${question}
 Expected answer: ${expected}
