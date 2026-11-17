@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { isNearBottom } from './chatHelpers'
 import { loadChat, saveChat, toMarkdown } from './chatStorage'
 import { Composer } from './components/Composer'
+import { DiceRoller } from './components/DiceRoller'
 import { Header } from './components/Header'
 import { MessageList } from './components/MessageList'
 import { QuivrMannetje } from './components/QuivrMannetje'
@@ -105,6 +106,10 @@ export function App() {
       </main>
       {!isShowingTraces && (
         <footer className="mx-auto w-full max-w-3xl p-4 pt-0">
+          <DiceRoller
+            isDisabled={chat.isRunning || !model}
+            onSend={handleSend}
+          />
           <Composer
             isDisabled={chat.isRunning || !model}
             isRunning={chat.isRunning}
