@@ -90,6 +90,64 @@
   background-attachment: fixed;
 }
 
+/* Nausea: the whole app slowly rolls and shears, like Minecraft's wobble. The
+   individual `rotate`/`translate`/`skew`/`scale` properties compose without
+   touching layout or hit-testing. Amplitude stays under 1deg / 2px so text is
+   still readable. `scale` covers the edges that rotate would otherwise expose. */
+@keyframes drunk-nausea-roll {
+  0%,
+  100% {
+    rotate: -0.6deg;
+    translate: -2px 1px;
+  }
+  50% {
+    rotate: 0.6deg;
+    translate: 2px -1px;
+  }
+}
+
+@keyframes drunk-nausea-skew {
+  0%,
+  100% {
+    skew: 0.4deg 0deg;
+  }
+  50% {
+    skew: -0.4deg 0deg;
+  }
+}
+
+@keyframes drunk-nausea-pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.drunk #root {
+  scale: 1.02;
+  animation:
+    drunk-nausea-roll 7s ease-in-out infinite,
+    drunk-nausea-skew 11s ease-in-out infinite;
+}
+
+/* Vignette: fixed, click-through, above the app content. Static tint under reduced motion */
+.drunk body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 50%,
+    rgb(255 80 170 / 0.22) 100%
+  );
+  animation: drunk-nausea-pulse 5s ease-in-out infinite;
+}
+
 /* Only chat messages sway (never the composer or inputs); the angle stays under 1deg so text stays crisp */
 @keyframes drunk-sway {
   0%,
@@ -130,9 +188,15 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .drunk #root,
+  .drunk body::after,
   .drunk .drunk-sway,
   .drunk .drunk-hic {
     animation: none;
+  }
+
+  .drunk #root {
+    scale: 1;
   }
 
   .drunk .drunk-hic {
