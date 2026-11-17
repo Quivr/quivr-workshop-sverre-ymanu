@@ -86,6 +86,8 @@ export class QuivrClient {
 
   getStudentBars(onlyShowOpen: boolean): Promise<FakbarsQuery> {
     return this.request('Fakbars', { onlyShowOpen })
+  }
+
   /**
    * Runs one arbitrary read-only query. Only `query` operations are accepted,
    * whatever QUIVR_READ_ONLY says. Used by the opt-in `run_graphql_query` tool.

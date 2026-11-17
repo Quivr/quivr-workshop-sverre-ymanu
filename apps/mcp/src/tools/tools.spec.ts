@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { QuivrClient } from '../quivr/quivr-client.js'
 import { findDish } from './find-dish.js'
@@ -10,7 +10,6 @@ import { getFriends } from './get-friends.js'
 import { getNews } from './get-news.js'
 import { getStudentBars } from './get-student-bars.js'
 import { getTodayOverview } from './get-today-overview.js'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { enabledTools, tools } from './index.js'
 import { MAX_RESPONSE_CHARS, runGraphqlQuery } from './run-graphql-query.js'
 
