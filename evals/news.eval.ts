@@ -2,7 +2,18 @@ import { defineEval, type EvalCase } from './lib/define-eval.js'
 import { fixtures } from './lib/fixture-data.js'
 
 const DONT_KNOW =
-  /(don't|do not|couldn't|could not|can't|cannot) (know|find|see)|no (news|information|articles|results)|not (in|on) (your|the)|doesn't (show|include|contain)|does not|isn't|is not|nothing/i
+  /(don't|do not|didn't|did not|couldn't|could not|can't|cannot) (know|find|see)|no (news|information|articles|results)|not (in|on) (your|the)|doesn't (show|include|contain)|does not|isn't|is not|nothing/i
+
+/** Distinctive start of a title, tolerant of the model rewording the rest. */
+const titleFact = (title: string) =>
+  new RegExp(
+    title
+      .replace(/^fake news:\s*/i, '')
+      .split(/\s+/)
+      .slice(0, 2)
+      .join('\\s+'),
+    'i'
+  )
 
 const topics = (await fixtures.getNewsTopics()).newsArticlesTopics
 const topic = topics[0]
@@ -18,7 +29,7 @@ const cases: EvalCase[] = [
     expected: latest
       ? `Mentions the most recent article: "${latest.title}".`
       : 'There is no news.',
-    facts: latest ? [latest.title.slice(0, 20)] : [DONT_KNOW],
+    facts: latest ? [titleFact(latest.title)] : [DONT_KNOW],
     tools: ['get_news'],
   },
   {
@@ -27,7 +38,7 @@ const cases: EvalCase[] = [
     expected: topicArticle
       ? `Mentions the ${topic} article "${topicArticle.title}".`
       : `There is no news about ${topic}.`,
-    facts: topicArticle ? [topicArticle.title.slice(0, 20)] : [DONT_KNOW],
+    facts: topicArticle ? [titleFact(topicArticle.title)] : [DONT_KNOW],
     tools: ['get_news'],
   },
   {
