@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import type { QuivrClient } from '../quivr/quivr-client.js'
+import { sanitise } from './sanitise.js'
 
 export const dateSchema = z
   .string()
@@ -16,6 +17,10 @@ export type ToolDefinition<Shape extends z.ZodRawShape = z.ZodRawShape> = {
   ) => Promise<unknown>
 }
 
+/** Declares a tool. Its output is sanitised (see sanitise.ts) before the model sees it. */
 export const defineTool = <Shape extends z.ZodRawShape>(
   tool: ToolDefinition<Shape>
-): ToolDefinition<Shape> => tool
+): ToolDefinition<Shape> => ({
+  ...tool,
+  run: async (input, quivr) => sanitise(await tool.run(input, quivr)),
+})

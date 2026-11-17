@@ -5,7 +5,14 @@ import { config } from 'agent/config'
 import { afterAll, describe, expect, it } from 'vitest'
 
 import { askAgent } from './run.js'
-import { includesFacts, judge, usedTools, type Score } from './scorers.js'
+import {
+  doesNotContain,
+  includesFacts,
+  judge,
+  onlyUsedTools,
+  usedTools,
+  type Score,
+} from './scorers.js'
 
 export type EvalCase = {
   name: string
@@ -16,6 +23,12 @@ export type EvalCase = {
   facts?: (string | RegExp)[]
   /** Tools the agent must call. */
   tools?: string[]
+  /** If set, the agent may call only these tools. */
+  onlyTools?: string[]
+  /** Strings or regexes that must not appear in the answer. */
+  forbidden?: (string | RegExp)[]
+  /** MCP server port to use instead of the default fixtures server. */
+  mcpPort?: number
 }
 
 type CaseResult = {
@@ -51,10 +64,20 @@ export const defineEval = (suite: string, cases: EvalCase[]) => {
   for (const model of models()) {
     describe(`${suite} · ${model}`, () => {
       it.each(cases)('$name', async evalCase => {
-        const result = await askAgent(evalCase.question, model)
+        const result = await askAgent(
+          evalCase.question,
+          model,
+          evalCase.mcpPort
+        )
         const scores = [
           includesFacts(result, evalCase.facts ?? []),
           usedTools(result, evalCase.tools ?? []),
+          ...(evalCase.onlyTools
+            ? [onlyUsedTools(result, evalCase.onlyTools)]
+            : []),
+          ...(evalCase.forbidden
+            ? [doesNotContain(result, evalCase.forbidden)]
+            : []),
           await judge(evalCase.question, evalCase.expected, result),
         ]
         results.push({
