@@ -113,7 +113,7 @@ export function App() {
           />
         </footer>
       )}
-      <QuivrMannetje />
+      <QuivrMannetje model={model} />
     </div>
   )
 }

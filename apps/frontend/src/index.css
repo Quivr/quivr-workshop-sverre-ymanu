@@ -238,3 +238,14 @@ body {
     animation: none;
   }
 }
+
+/* Explain mode: the page is "pointable". Our own UI is left alone. */
+.quivr-explain-mode
+  *:not([data-quivr-mannetje], [data-quivr-mannetje] *) {
+  cursor: help !important;
+}
+
+.quivr-explain-hover {
+  outline: 3px solid var(--color-main);
+  outline-offset: 2px;
+}

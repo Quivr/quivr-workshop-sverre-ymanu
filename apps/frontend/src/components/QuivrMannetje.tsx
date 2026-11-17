@@ -7,6 +7,10 @@ import {
   useState,
 } from 'react'
 
+import { describeElement, describeSelection, isOwnUi } from '../explainDom'
+import type { ExplainTarget } from '../explain'
+import { useExplain } from '../useExplain'
+
 const STEPS = [
   {
     title: 'Hi, I am quivr-mannetje!',
@@ -23,6 +27,10 @@ const STEPS = [
   {
     title: 'The header',
     text: 'In the header you can pick a model, open Traces to see recent agent runs, start a New chat, and switch between dark and light mode.',
+  },
+  {
+    title: 'Explain anything',
+    text: 'Press the magnifier button next to me, then click anything on the page or select some text, and I will explain it. Press Escape to stop.',
   },
   {
     title: 'Give it a try',
@@ -44,6 +52,10 @@ const SPEAK_DELAY_MS = 80
 // The opening tour moves on by itself: reading time = base + per character
 const READ_BASE_MS = 4000
 const READ_PER_CHAR_MS = 70
+// An explanation stays up long enough to be read (and spoken) in full
+const EXPLAIN_PER_CHAR_MS = 90
+// Wait a moment after a click: a drag or double click ends in a text selection
+const ELEMENT_CLICK_DELAY_MS = 250
 const CORNERED_DISTANCE = 20 // a flee target closer than this means he is stuck against an edge
 const IS_SPEECH_SUPPORTED =
   typeof window !== 'undefined' && 'speechSynthesis' in window
@@ -71,6 +83,8 @@ const pickVoice = () => {
 
 const iconButtonClass =
   'border-schedule-border-grey bg-surface text-heading hover:bg-cardbg pointer-events-auto flex h-7 w-7 items-center justify-center rounded-full border text-sm shadow-sm'
+const iconButtonOnClass =
+  'border-sidenav-blue bg-main text-sidenav-blue pointer-events-auto flex h-7 w-7 items-center justify-center rounded-full border text-sm shadow-sm'
 
 type Point = { x: number; y: number }
 
@@ -217,7 +231,11 @@ function Mannetje({ isTalking }: { isTalking: boolean }) {
 }
 
 /** Little Q-shaped guide: gives a spoken tour, then wanders the screen and plays with the cursor. */
-export function QuivrMannetje() {
+export function QuivrMannetje({ model }: { model: string }) {
+  const explainer = useExplain(model)
+  const { state: explanation, dismiss: dismissExplanation } = explainer
+  // Explain mode: clicks and text selections are explained instead of used
+  const [isExplainMode, setIsExplainMode] = useState(false)
   const [isOpen, setIsOpen] = useState(true)
   // The tour that opens by itself closes by itself; one the user asked for stays
   const [isAutoTour, setIsAutoTour] = useState(true)
@@ -247,10 +265,16 @@ export function QuivrMannetje() {
   const isOpenRef = useRef(isOpen)
   const isReducedMotion = usePrefersReducedMotion()
 
+  const isExplaining = explanation.status !== 'idle'
   const current = STEPS[step]
+  const spokenText = isExplaining
+    ? explanation.status === 'done'
+      ? explanation.text
+      : undefined
+    : current?.text
   const isLast = step === STEPS.length - 1
   const canSpeak = IS_SPEECH_SUPPORTED && !isMuted
-  const shouldShowHint = canSpeak && !hasStarted
+  const shouldShowHint = canSpeak && !hasStarted && spokenText !== undefined
 
   const close = useCallback(() => {
     // Don't leave keyboard focus on a bubble that is about to disappear
@@ -258,15 +282,34 @@ export function QuivrMannetje() {
       helpRef.current?.focus()
     }
     setIsHovering(false)
+    dismissExplanation()
     setIsOpen(false)
-  }, [])
+  }, [dismissExplanation])
 
   const open = () => {
     shouldFocusNextRef.current = true
     setIsAutoTour(false)
+    dismissExplanation()
     setStep(0)
     setIsOpen(true)
   }
+
+  const toggleExplainMode = () => {
+    // Explaining stands in for the tour: don't leave both going
+    if (!isExplainMode && !isExplaining) setIsOpen(false)
+    setIsExplainMode(value => !value)
+  }
+
+  const explainTarget = (target: ExplainTarget) => {
+    setIsAutoTour(false)
+    setIsHovering(false)
+    setIsOpen(true)
+    void explainer.explain(target)
+  }
+  const explainTargetRef = useRef(explainTarget)
+  useEffect(() => {
+    explainTargetRef.current = explainTarget
+  })
 
   const toggleMuted = () => {
     const next = !isMuted
@@ -304,7 +347,7 @@ export function QuivrMannetje() {
   // Speak the current step. The short delay lets StrictMode's double mount and
   // Chrome's cancel()-then-speak() quirk pass without overlapping utterances.
   useEffect(() => {
-    const text = STEPS[step]?.text
+    const text = spokenText
     if (!IS_SPEECH_SUPPORTED || !isOpen || isMuted || !text) return
     const synth = window.speechSynthesis
     const timer = window.setTimeout(() => {
@@ -337,7 +380,7 @@ export function QuivrMannetje() {
       synth.cancel()
       setIsTalking(false)
     }
-  }, [isOpen, step, isMuted, retryCount])
+  }, [isOpen, spokenText, isMuted, retryCount])
 
   // Autoplay is usually blocked: the first interaction retries the current step
   useEffect(() => {
@@ -367,7 +410,9 @@ export function QuivrMannetje() {
   // last one. It waits while the page is hidden or the bubble is hovered. It
   // does not depend on the window having focus: you can watch it unfocused.
   useEffect(() => {
-    if (!isOpen || !isAutoTour || !isVisible || isHovering) return
+    if (!isOpen || isExplaining || !isAutoTour || !isVisible || isHovering) {
+      return
+    }
     const delay =
       READ_BASE_MS + (STEPS[step]?.text.length ?? 0) * READ_PER_CHAR_MS
     const timer = window.setTimeout(
@@ -375,7 +420,90 @@ export function QuivrMannetje() {
       delay
     )
     return () => window.clearTimeout(timer)
-  }, [isOpen, isAutoTour, isVisible, isHovering, step, isLast, close])
+  }, [
+    isOpen,
+    isExplaining,
+    isAutoTour,
+    isVisible,
+    isHovering,
+    step,
+    isLast,
+    close,
+  ])
+
+  // An explanation closes itself once it has been read, so he goes back to
+  // roaming. A pending or failed one is left for the student to dismiss.
+  useEffect(() => {
+    if (!isOpen || explanation.status !== 'done' || !isVisible || isHovering) {
+      return
+    }
+    const delay = READ_BASE_MS + explanation.text.length * EXPLAIN_PER_CHAR_MS
+    const timer = window.setTimeout(close, delay)
+    return () => window.clearTimeout(timer)
+  }, [isOpen, explanation, isVisible, isHovering, close])
+
+  // Explain mode: the next click or text selection is explained, not used
+  useEffect(() => {
+    if (!isExplainMode) return
+    const root = document.documentElement
+    root.classList.add('quivr-explain-mode')
+    let hovered: Element | null = null
+    let pending = 0
+
+    const unhover = () => hovered?.classList.remove('quivr-explain-hover')
+
+    const handleOver = (event: MouseEvent) => {
+      unhover()
+      hovered =
+        event.target instanceof Element && !isOwnUi(event.target)
+          ? event.target
+          : null
+      hovered?.classList.add('quivr-explain-hover')
+    }
+
+    const handleClick = (event: MouseEvent) => {
+      if (isOwnUi(event.target) || !(event.target instanceof Element)) return
+      // The click is for the mannetje, not for the button underneath
+      event.preventDefault()
+      event.stopPropagation()
+      const element = event.target
+      window.clearTimeout(pending)
+      pending = window.setTimeout(() => {
+        if (!describeSelection()) {
+          explainTargetRef.current(describeElement(element))
+        }
+      }, ELEMENT_CLICK_DELAY_MS)
+    }
+
+    // After the mouse is released the selection is final
+    const handleMouseUp = (event: MouseEvent) => {
+      if (isOwnUi(event.target)) return
+      window.setTimeout(() => {
+        const target = describeSelection()
+        if (!target) return
+        window.clearTimeout(pending)
+        explainTargetRef.current(target)
+      }, 0)
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsExplainMode(false)
+    }
+
+    window.addEventListener('mouseover', handleOver, true)
+    window.addEventListener('click', handleClick, true)
+    window.addEventListener('mouseup', handleMouseUp, true)
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('mouseover', handleOver, true)
+      window.removeEventListener('click', handleClick, true)
+      window.removeEventListener('mouseup', handleMouseUp, true)
+      window.removeEventListener('keydown', handleKeyDown)
+      window.clearTimeout(pending)
+      unhover()
+      root.classList.remove('quivr-explain-mode')
+    }
+  }, [isExplainMode])
 
   // Updated in a layout effect so the animation loop never reads a stale value
   useLayoutEffect(() => {
@@ -561,23 +689,36 @@ export function QuivrMannetje() {
       <div
         ref={spriteRef}
         data-mode="idle"
+        data-quivr-mannetje=""
         className="quivr-mannetje pointer-events-none fixed top-0 left-0 z-50 h-14 w-14"
       >
         <Mannetje isTalking={isTalking} />
       </div>
-      <div className="pointer-events-none fixed right-3 bottom-24 z-50 flex max-w-[calc(100vw-1.5rem)] flex-col items-end gap-2 lg:right-4 lg:bottom-4">
+      <div
+        data-quivr-mannetje=""
+        className="pointer-events-none fixed right-3 bottom-24 z-50 flex max-w-[calc(100vw-1.5rem)] flex-col items-end gap-2 lg:right-4 lg:bottom-4"
+      >
+        {isExplainMode && !isOpen && (
+          <p className="bg-main text-sidenav-blue pointer-events-auto rounded-full px-3 py-1 text-xs font-bold shadow-lg">
+            Click something or select text. Esc to stop.
+          </p>
+        )}
         {isOpen && current && (
           <div
             ref={bubbleRef}
             role="dialog"
-            aria-label="quivr-mannetje tour"
+            aria-label={
+              isExplaining
+                ? 'quivr-mannetje explanation'
+                : 'quivr-mannetje tour'
+            }
             onPointerEnter={() => setIsHovering(true)}
             onPointerLeave={() => setIsHovering(false)}
             className="quivr-mannetje-bubble border-schedule-border-grey bg-surface text-main-text pointer-events-auto relative w-72 max-w-full rounded-xl border p-3 text-sm shadow-lg"
           >
             <div className="mb-1 flex items-center gap-2">
-              <span className="font-title text-heading mr-auto text-xl tracking-wide">
-                {current.title}
+              <span className="font-title text-heading mr-auto truncate text-xl tracking-wide">
+                {isExplaining ? explanation.label : current.title}
               </span>
               {IS_SPEECH_SUPPORTED && (
                 <button
@@ -597,7 +738,16 @@ export function QuivrMannetje() {
               aria-live="polite"
               className="break-words"
             >
-              {current.text}
+              {explanation.status === 'idle' && current.text}
+              {explanation.status === 'loading' && (
+                <span className="text-muted animate-pulse">
+                  Let me take a look…
+                </span>
+              )}
+              {explanation.status === 'done' && explanation.text}
+              {explanation.status === 'error' && (
+                <span className="text-danger-text">{explanation.message}</span>
+              )}
             </p>
             {shouldShowHint && (
               <button
@@ -608,32 +758,46 @@ export function QuivrMannetje() {
                 🔊 Click to hear me
               </button>
             )}
-            <div className="mt-3 flex items-center gap-2">
-              <span className="text-muted mr-auto text-xs">
-                {step + 1} / {STEPS.length}
-              </span>
-              {!isLast && (
+            {isExplaining ? (
+              <div className="mt-3 flex items-center justify-end gap-2">
                 <button
+                  ref={nextRef}
                   type="button"
                   onClick={close}
-                  aria-label="Skip the quivr-mannetje tour"
-                  className="text-muted hover:text-heading rounded px-2 py-1 text-xs"
+                  aria-label="Close the explanation"
+                  className="bg-main text-sidenav-blue rounded-md px-3 py-1 text-xs font-bold"
                 >
-                  Skip
+                  Thanks
                 </button>
-              )}
-              <button
-                ref={nextRef}
-                type="button"
-                onClick={isLast ? close : () => setStep(step + 1)}
-                aria-label={
-                  isLast ? 'Finish the quivr-mannetje tour' : 'Next tip'
-                }
-                className="bg-main text-sidenav-blue rounded-md px-3 py-1 text-xs font-bold"
-              >
-                {isLast ? 'Done' : 'Next'}
-              </button>
-            </div>
+              </div>
+            ) : (
+              <div className="mt-3 flex items-center gap-2">
+                <span className="text-muted mr-auto text-xs">
+                  {step + 1} / {STEPS.length}
+                </span>
+                {!isLast && (
+                  <button
+                    type="button"
+                    onClick={close}
+                    aria-label="Skip the quivr-mannetje tour"
+                    className="text-muted hover:text-heading rounded px-2 py-1 text-xs"
+                  >
+                    Skip
+                  </button>
+                )}
+                <button
+                  ref={nextRef}
+                  type="button"
+                  onClick={isLast ? close : () => setStep(step + 1)}
+                  aria-label={
+                    isLast ? 'Finish the quivr-mannetje tour' : 'Next tip'
+                  }
+                  className="bg-main text-sidenav-blue rounded-md px-3 py-1 text-xs font-bold"
+                >
+                  {isLast ? 'Done' : 'Next'}
+                </button>
+              </div>
+            )}
             <span
               aria-hidden="true"
               className="border-schedule-border-grey bg-surface absolute right-[22px] -bottom-1.5 h-3 w-3 rotate-45 border-r border-b"
@@ -641,6 +805,20 @@ export function QuivrMannetje() {
           </div>
         )}
         <div className="flex items-end gap-2">
+          <button
+            type="button"
+            onClick={toggleExplainMode}
+            aria-label={
+              isExplainMode
+                ? 'Stop explaining'
+                : 'Explain something: then click an element or select text'
+            }
+            aria-pressed={isExplainMode}
+            title="Explain something"
+            className={isExplainMode ? iconButtonOnClass : iconButtonClass}
+          >
+            🔍
+          </button>
           <button
             ref={helpRef}
             type="button"
