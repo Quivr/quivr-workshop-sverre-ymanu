@@ -28,6 +28,7 @@ export function MessageList({ messages, durations, isRunning }: Props) {
           return (
             <div
               key={message.id}
+              // dark-mode-ok: dark text on the brand yellow bg-main (6.67:1) in both themes
               className="bg-main text-sidenav-blue ml-auto max-w-[80%] rounded-lg px-3 py-2 whitespace-pre-wrap"
             >
               {textOf(message.content)}

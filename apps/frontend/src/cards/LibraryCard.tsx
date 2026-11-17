@@ -10,8 +10,8 @@ import {
 import type { CardProps } from './types'
 
 const barColour: Record<Level, string> = {
-  low: 'bg-green-status',
-  medium: 'bg-main',
+  low: 'bg-ok',
+  medium: 'bg-warn',
   high: 'bg-danger',
 }
 

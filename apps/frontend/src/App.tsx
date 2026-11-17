@@ -78,7 +78,7 @@ export function App() {
           />
         )}
         {chat.error && !isShowingTraces && (
-          <p className="bg-danger/10 text-danger mt-3 rounded-md px-3 py-2 text-sm">
+          <p className="bg-danger/10 text-danger-text mt-3 rounded-md px-3 py-2 text-sm">
             {chat.error}
           </p>
         )}

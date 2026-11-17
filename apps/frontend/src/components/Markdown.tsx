@@ -46,7 +46,7 @@ const components: Components = {
   ),
   a: props => (
     <a
-      className="text-blue-pretty underline"
+      className="text-link underline"
       target="_blank"
       rel="noreferrer"
       {...props}

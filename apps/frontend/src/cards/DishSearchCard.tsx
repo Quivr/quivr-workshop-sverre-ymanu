@@ -39,7 +39,7 @@ export function DishSearchCard({ result }: CardProps) {
               <span className="font-bold">{match.dish}</span>
               {match.vegan ? ' 🌱' : match.vegetarian ? ' 🥕' : ''}
               <br />
-              <span className="text-xs opacity-70">
+              <span className="text-muted text-xs">
                 {match.date} · {match.restaurant}
               </span>
             </span>

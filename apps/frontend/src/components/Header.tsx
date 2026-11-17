@@ -30,6 +30,7 @@ export function Header({
         alt=""
         className="h-8 w-8"
       />
+      {/* dark-mode-ok: brand yellow on the fixed bg-sidenav-blue bar (6.67:1) in both themes */}
       <h1 className="font-title text-main mr-auto text-3xl tracking-wide">
         Ask Quivr
       </h1>
