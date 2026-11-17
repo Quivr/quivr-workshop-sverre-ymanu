@@ -5,6 +5,8 @@ query Restaurants {
     location {
       name
       address
+      latitude
+      longitude
     }
   }
 }

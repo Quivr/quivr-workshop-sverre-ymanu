@@ -12,6 +12,8 @@ query MySchedule($timeRange: TimeRangeInput!) {
       locations {
         name
         address
+        latitude
+        longitude
       }
       ... on Lesson {
         teachers {
