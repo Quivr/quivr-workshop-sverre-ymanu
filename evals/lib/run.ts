@@ -11,7 +11,14 @@ export type ToolCall = {
   output: unknown
   isError: boolean
 }
-export type AgentResult = { text: string; toolCalls: ToolCall[] }
+export type AgentResult = {
+  text: string
+  toolCalls: ToolCall[]
+  /** Duration of the agent run in ms. */
+  latencyMs: number
+  /** Total token usage over all steps, when the provider reports it. */
+  usage?: { inputTokens?: number; outputTokens?: number }
+}
 
 /** The frozen "now" of the fixtures, so every eval sees the same day. */
 export const fixturesNow = (): Date => {
@@ -28,7 +35,8 @@ export const askAgent = async (
   mcpPort = EVAL_MCP_PORT,
   onlyTools?: string[]
 ): Promise<AgentResult> => {
-  const result: AgentResult = { text: '', toolCalls: [] }
+  const result: AgentResult = { text: '', toolCalls: [], latencyMs: 0 }
+  const startedAt = performance.now()
   const parts = runAgent({
     messages: [{ role: 'user', content: question }],
     model,
@@ -53,7 +61,14 @@ export const askAgent = async (
             output.isError === true),
       })
     }
+    if (part.type === 'finish') {
+      result.usage = {
+        inputTokens: part.totalUsage.inputTokens,
+        outputTokens: part.totalUsage.outputTokens,
+      }
+    }
     if (part.type === 'error') throw part.error
   }
+  result.latencyMs = Math.round(performance.now() - startedAt)
   return result
 }

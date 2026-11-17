@@ -114,6 +114,11 @@ test:
 eval:
     yarn eval
 
+# Write evals/results/REPORT.md (per model: scores, latency, tokens, cost; low judge scores) from the last eval runs
+[group('quality')]
+eval-report:
+    yarn workspace evals report
+
 # Open the eval UI in watch mode
 [group('quality')]
 eval-ui:
