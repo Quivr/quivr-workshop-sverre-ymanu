@@ -22,6 +22,7 @@ import type {
 } from './__generated__/graphql.js'
 import { dayRange } from './dates.js'
 import { readFixture } from './fixtures.js'
+import { findRecordedOperation, parseSingleQuery } from './raw-query.js'
 
 const REQUEST_TIMEOUT_MS = 10_000
 
@@ -85,6 +86,17 @@ export class QuivrClient {
 
   getStudentBars(onlyShowOpen: boolean): Promise<FakbarsQuery> {
     return this.request('Fakbars', { onlyShowOpen })
+  /**
+   * Runs one arbitrary read-only query. Only `query` operations are accepted,
+   * whatever QUIVR_READ_ONLY says. Used by the opt-in `run_graphql_query` tool.
+   */
+  async rawQuery(query: string, variables: object = {}): Promise<unknown> {
+    const operation = parseSingleQuery(query)
+
+    if (this.options.mode === 'fixtures') {
+      return readFixture(findRecordedOperation(query), variables)
+    }
+    return this.send(operation.name?.value, query, variables)
   }
 
   async request<T>(operationName: string, variables: object): Promise<T> {
@@ -120,7 +132,7 @@ export class QuivrClient {
   }
 
   private async send<T>(
-    operationName: string,
+    operationName: string | undefined,
     query: string,
     variables: object
   ): Promise<T> {
@@ -151,7 +163,8 @@ export class QuivrClient {
     if (body.errors?.length) {
       throw new Error(body.errors.map(error => error.message).join('; '))
     }
-    if (!body.data) throw new Error(`${operationName} returned no data`)
+    if (!body.data)
+      throw new Error(`${operationName ?? 'The query'} returned no data`)
     return body.data
   }
 }

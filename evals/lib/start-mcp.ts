@@ -23,6 +23,8 @@ const startServer = async (port: number, fixturesDir?: string) => {
       QUIVR_MODE: 'fixtures',
       MCP_PORT: String(port),
       ...(fixturesDir && { QUIVR_FIXTURES_DIR: fixturesDir }),
+      // Opt-in tool: on only when the eval run asks for it, not via .env.
+      ENABLE_GENERIC_GRAPHQL: process.env.ENABLE_GENERIC_GRAPHQL ?? 'false',
     },
     stdio: 'ignore',
   })

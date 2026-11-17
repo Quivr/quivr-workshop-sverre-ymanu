@@ -25,12 +25,14 @@ export const fixturesNow = (): Date => {
 export const askAgent = async (
   question: string,
   model: string,
-  mcpPort = EVAL_MCP_PORT
+  mcpPort = EVAL_MCP_PORT,
+  onlyTools?: string[]
 ): Promise<AgentResult> => {
   const result: AgentResult = { text: '', toolCalls: [] }
   const parts = runAgent({
     messages: [{ role: 'user', content: question }],
     model,
+    onlyTools,
     now: fixturesNow(),
     mcpUrl: `http://localhost:${mcpPort}/mcp`,
   })

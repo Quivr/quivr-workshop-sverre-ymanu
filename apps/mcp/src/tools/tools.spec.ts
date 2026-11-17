@@ -10,6 +10,9 @@ import { getFriends } from './get-friends.js'
 import { getNews } from './get-news.js'
 import { getStudentBars } from './get-student-bars.js'
 import { getTodayOverview } from './get-today-overview.js'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { enabledTools, tools } from './index.js'
+import { MAX_RESPONSE_CHARS, runGraphqlQuery } from './run-graphql-query.js'
 
 const fakeQuivr = (overrides: Partial<QuivrClient>) =>
   overrides as unknown as QuivrClient
@@ -683,5 +686,110 @@ describe('get_today_overview', () => {
       restaurant: null,
       match: { rule: 'none' },
     })
+  })
+})
+
+describe('run_graphql_query', () => {
+  const rawQuery = vi.fn(
+    async (_query: string, _variables: object): Promise<unknown> => ({
+      friendList: [{ id: '1', firstName: 'Sam' }],
+    })
+  )
+  const quivr = fakeQuivr({ rawQuery })
+
+  beforeEach(() => rawQuery.mockClear())
+
+  it('passes a valid query and its variables to the client', async () => {
+    const query = 'query Friends($n: Int) { friendList { id firstName } }'
+
+    const result = await runGraphqlQuery.run(
+      { query, variables: { n: 1 } },
+      quivr
+    )
+
+    expect(rawQuery).toHaveBeenCalledWith(query, { n: 1 })
+    expect(result).toEqual({ friendList: [{ id: '1', firstName: 'Sam' }] })
+  })
+
+  it('rejects mutations without calling the client', async () => {
+    await expect(
+      runGraphqlQuery.run(
+        { query: 'mutation { createEvent(eventInput: {}) { id } }' },
+        quivr
+      )
+    ).rejects.toThrow(/Only read-only queries.*mutations/)
+    expect(rawQuery).not.toHaveBeenCalled()
+  })
+
+  it('rejects subscriptions', async () => {
+    await expect(
+      runGraphqlQuery.run({ query: 'subscription { tick }' }, quivr)
+    ).rejects.toThrow(/subscriptions/)
+  })
+
+  it('rejects a mutation hidden after a query', async () => {
+    await expect(
+      runGraphqlQuery.run(
+        {
+          query:
+            'query A { friendList { id } } mutation B { createEvent { id } }',
+        },
+        quivr
+      )
+    ).rejects.toThrow(/exactly one query/)
+    expect(rawQuery).not.toHaveBeenCalled()
+  })
+
+  it('rejects fragment definitions', async () => {
+    await expect(
+      runGraphqlQuery.run(
+        { query: 'query { friendList { ...F } } fragment F on Friend { id }' },
+        quivr
+      )
+    ).rejects.toThrow(/exactly one query/)
+  })
+
+  it('returns a helpful message for a syntax error', async () => {
+    await expect(
+      runGraphqlQuery.run({ query: 'query { friendList { id ' }, quivr)
+    ).rejects.toThrow(/not valid GraphQL: Syntax Error/)
+    expect(rawQuery).not.toHaveBeenCalled()
+  })
+
+  it('rejects queries nested too deeply', async () => {
+    const query = `query ${'{ a '.repeat(9)}${'}'.repeat(9)}`
+
+    await expect(runGraphqlQuery.run({ query }, quivr)).rejects.toThrow(
+      /deeper than 8/
+    )
+  })
+
+  it('truncates big responses with a clear marker', async () => {
+    rawQuery.mockResolvedValueOnce({
+      news: [{ body: 'x'.repeat(MAX_RESPONSE_CHARS) }],
+    })
+
+    const result = await runGraphqlQuery.run(
+      { query: '{ news { body } }' },
+      quivr
+    )
+
+    expect(result).toMatchObject({
+      truncated: true,
+      note: expect.stringContaining('incomplete'),
+    })
+    expect((result as { partialJson: string }).partialJson).toHaveLength(
+      MAX_RESPONSE_CHARS
+    )
+  })
+
+  it('is only exposed when enabled', () => {
+    expect(tools.map(tool => tool.name)).not.toContain('run_graphql_query')
+    expect(
+      enabledTools({ enableGenericGraphql: false }).map(tool => tool.name)
+    ).not.toContain('run_graphql_query')
+    expect(
+      enabledTools({ enableGenericGraphql: true }).map(tool => tool.name)
+    ).toContain('run_graphql_query')
   })
 })

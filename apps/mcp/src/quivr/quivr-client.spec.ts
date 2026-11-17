@@ -72,6 +72,46 @@ describe('QuivrClient', () => {
   })
 })
 
+describe('QuivrClient.rawQuery', () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  it('sends a valid query, even when read-only', async () => {
+    const fetch = respondWith({ friendList: [] })
+
+    const data = await client().rawQuery('query Friends { friendList { id } }')
+
+    expect(data).toEqual({ friendList: [] })
+    const body = JSON.parse(String(fetch.mock.calls[0]?.[1]?.body))
+    expect(body.operationName).toBe('Friends')
+  })
+
+  it('rejects mutations even when QUIVR_READ_ONLY=false', async () => {
+    const fetch = respondWith({})
+
+    await expect(
+      client({ readOnly: false }).rawQuery('mutation { createEvent { id } }')
+    ).rejects.toThrow(/read-only/)
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
+  it('explains that raw queries need live mode in fixtures mode', async () => {
+    const fetch = respondWith({})
+
+    await expect(
+      client({ mode: 'fixtures' }).rawQuery('{ friendList { id } }')
+    ).rejects.toThrow(/QUIVR_MODE=live/)
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
+  it('accepts a recorded query in fixtures mode, whatever its formatting', async () => {
+    await expect(
+      client({ mode: 'fixtures' }).rawQuery(
+        'query   Libraries{libraries{id name data{capacity occupancy timestamp} location{address}}}'
+      )
+    ).resolves.toBeDefined()
+  })
+})
+
 describe('credentialsFrom', () => {
   it('uses the Authorization header from the login response', () => {
     expect(credentialsFrom({ QUIVR_AUTHORIZATION: 'Bearer t' })).toEqual({

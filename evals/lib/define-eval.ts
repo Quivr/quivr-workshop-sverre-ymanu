@@ -58,7 +58,20 @@ const average = (results: CaseResult[], name: string) => {
  * One eval suite: runs every case on every model, scores it, and fails a case
  * when a deterministic check (facts, tools) is not fully met.
  */
-export const defineEval = (suite: string, cases: EvalCase[]) => {
+export const defineEval = (
+  suite: string,
+  cases: EvalCase[],
+  options: {
+    /** Expose only these tools to the agent. Default: all tools. */
+    onlyTools?: string[]
+    /** Skip the suite, with the reason shown in the output. */
+    skip?: string
+  } = {}
+) => {
+  if (options.skip) {
+    describe.skip(`${suite} (${options.skip})`, () => it('skipped', () => {}))
+    return
+  }
   const results: CaseResult[] = []
 
   for (const model of models()) {
@@ -67,7 +80,8 @@ export const defineEval = (suite: string, cases: EvalCase[]) => {
         const result = await askAgent(
           evalCase.question,
           model,
-          evalCase.mcpPort
+          evalCase.mcpPort,
+          options.onlyTools
         )
         const scores = [
           includesFacts(result, evalCase.facts ?? []),
