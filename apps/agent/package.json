@@ -8,6 +8,7 @@
     "@ag-ui/encoder": "1.0.4",
     "@ai-sdk/anthropic": "4.0.102",
     "@ai-sdk/mcp": "2.0.96",
+    "@ai-sdk/openai": "4.0.118",
     "@nestjs/common": "12.4.2",
     "@nestjs/core": "12.4.2",
     "@nestjs/platform-express": "12.4.2",

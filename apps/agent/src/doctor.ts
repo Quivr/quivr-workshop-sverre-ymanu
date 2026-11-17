@@ -40,6 +40,15 @@ const checks: Check[] = [
       if (!process.env.ANTHROPIC_API_KEY) {
         fail('ANTHROPIC_API_KEY is empty', 'Add your group key to .env')
       }
+      const usesOpenAI = [...config.allowedModels, config.judgeModel].some(id =>
+        id.startsWith('openai:')
+      )
+      if (usesOpenAI && !process.env.OPENAI_API_KEY) {
+        fail(
+          'OPENAI_API_KEY is empty, but an openai: model is configured',
+          'Add the key to .env, or remove openai: models from ALLOWED_MODELS / JUDGE_MODEL'
+        )
+      }
       if (!config.allowedModels.includes(config.defaultModel)) {
         fail(
           `DEFAULT_MODEL "${config.defaultModel}" is not in ALLOWED_MODELS`,
