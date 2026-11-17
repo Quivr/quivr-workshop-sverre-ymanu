@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { Composer } from './components/Composer'
 import { Header } from './components/Header'
 import { MessageList } from './components/MessageList'
+import { QuivrMannetje } from './components/QuivrMannetje'
 import { TracesPanel } from './components/TracesPanel'
 import { useAgentChat } from './useAgentChat'
 import { useTheme } from './useTheme'
@@ -87,6 +88,7 @@ export function App() {
           />
         </footer>
       )}
+      <QuivrMannetje />
     </div>
   )
 }
